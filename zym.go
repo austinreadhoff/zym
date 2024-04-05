@@ -5,86 +5,47 @@ import (
 	"math"
 )
 
-type Fermentable struct {
-	Name    string
-	Yield   int
-	Percent float64
-	Oz      float64
-	Color   int
-	Mash    bool
-}
-
-type Hop struct {
-	Name      string
-	AlphaAcid float64
-	Oz        float64
-	BoilTime  int
-	DryHop    bool
-}
-
-func (hop Hop) Utilization() float64 {
-	if hop.DryHop {
-		return 0.0
-	}
-
-	switch {
-	case hop.BoilTime <= 9:
-		return 0.06
-	case hop.BoilTime <= 19:
-		return 0.15
-	case hop.BoilTime <= 29:
-		return 0.19
-	case hop.BoilTime <= 44:
-		return 0.24
-	case hop.BoilTime <= 59:
-		return 0.27
-	case hop.BoilTime <= 74:
-		return 0.30
-	default:
-		return 0.34
-	}
-}
-
 func main() {
 	//equipment profile
-	targetBatchGallons := 2.5
-	preFermentationGallons := 6.0
-	brewhouseEfficiency := 0.75
+	var profile EquipmentProfile
+	profile.BrewhouseEfficiency = 2.5
+	profile.PreFermentationGallons = 6.0
+	profile.BrewhouseEfficiency = 0.75
 
 	//recipe
-	og := 1.06
-	ibu := 45.0
+	var recipe Recipe
+	recipe.OG = 1.06
+	recipe.IBU = 45.0
 
-	var fermentablesB []Fermentable
-	fermentablesB = append(fermentablesB, Fermentable{
+	recipe.Fermentables = append(recipe.Fermentables, Fermentable{
 		Name:    "2-Row",
 		Yield:   36,
 		Percent: 0.875,
 		Color:   2,
 		Mash:    true,
 	})
-	fermentablesB = append(fermentablesB, Fermentable{
+	recipe.Fermentables = append(recipe.Fermentables, Fermentable{
 		Name:    "Victory",
 		Yield:   34,
 		Percent: 0.05,
 		Color:   25,
 		Mash:    true,
 	})
-	fermentablesB = append(fermentablesB, Fermentable{
+	recipe.Fermentables = append(recipe.Fermentables, Fermentable{
 		Name:    "Crystal 40",
 		Yield:   34,
 		Percent: 0.025,
 		Color:   40,
 		Mash:    true,
 	})
-	fermentablesB = append(fermentablesB, Fermentable{
+	recipe.Fermentables = append(recipe.Fermentables, Fermentable{
 		Name:    "Crystal 80",
 		Yield:   34,
 		Percent: 0.025,
 		Color:   80,
 		Mash:    true,
 	})
-	fermentablesB = append(fermentablesB, Fermentable{
+	recipe.Fermentables = append(recipe.Fermentables, Fermentable{
 		Name:    "Carapils",
 		Yield:   33,
 		Percent: 0.025,
@@ -92,26 +53,25 @@ func main() {
 		Mash:    true,
 	})
 
-	bitteringHop := Hop{
+	recipe.BitteringHop = Hop{
 		Name:      "Cascade",
 		AlphaAcid: 0.052,
 		BoilTime:  60,
 	}
 
-	var flavorAromaHops []Hop
-	flavorAromaHops = append(flavorAromaHops, Hop{
+	recipe.FlavorAromaHops = append(recipe.FlavorAromaHops, Hop{
 		Name:      "Cascade",
 		AlphaAcid: 0.052,
 		Oz:        1.0,
 		BoilTime:  20,
 	})
-	flavorAromaHops = append(flavorAromaHops, Hop{
+	recipe.FlavorAromaHops = append(recipe.FlavorAromaHops, Hop{
 		Name:      "Cascade",
 		AlphaAcid: 0.052,
 		Oz:        0.5,
 		BoilTime:  10,
 	})
-	flavorAromaHops = append(flavorAromaHops, Hop{
+	recipe.FlavorAromaHops = append(recipe.FlavorAromaHops, Hop{
 		Name:      "Cascade",
 		AlphaAcid: 0.052,
 		Oz:        0.5,
@@ -119,51 +79,51 @@ func main() {
 	})
 
 	//calculate grain bill
-	gravityUnits := (og - 1) * 1000 * targetBatchGallons
+	gravityUnits := (recipe.OG - 1) * 1000 * profile.BrewhouseEfficiency
 
-	for i, fermentable := range fermentablesB {
+	for i, fermentable := range recipe.Fermentables {
 		fermentableUnits := fermentable.Percent * float64(gravityUnits)
 
 		efficiency := 1.0
 		if fermentable.Mash {
-			efficiency = brewhouseEfficiency
+			efficiency = profile.BrewhouseEfficiency
 		}
 
-		fermentablesB[i].Oz = (fermentableUnits / float64(fermentable.Yield) / efficiency) * 16
+		recipe.Fermentables[i].Oz = (fermentableUnits / float64(fermentable.Yield) / efficiency) * 16
 	}
 
 	//calculate hop additions
 	gravityCorrectionFactor := 1.0
-	if og > 1.050 {
-		gravityCorrectionFactor = 1 + ((og - 1.050) / 0.2)
+	if recipe.OG > 1.050 {
+		gravityCorrectionFactor = 1 + ((recipe.OG - 1.050) / 0.2)
 	}
 
-	ibuRemaining := ibu
-	for _, hop := range flavorAromaHops {
-		ibu = (hop.Oz * hop.Utilization() * hop.AlphaAcid * 7489) / (preFermentationGallons * gravityCorrectionFactor)
-		ibuRemaining -= ibu
+	ibuRemaining := recipe.IBU
+	for _, hop := range recipe.FlavorAromaHops {
+		recipe.IBU = (hop.Oz * hop.Utilization() * hop.AlphaAcid * 7489) / (profile.PreFermentationGallons * gravityCorrectionFactor)
+		ibuRemaining -= recipe.IBU
 	}
 
 	if ibuRemaining > 0 {
-		bitteringHop.Oz = (preFermentationGallons * gravityCorrectionFactor * ibuRemaining) / (bitteringHop.Utilization() * bitteringHop.AlphaAcid * 7489)
+		recipe.BitteringHop.Oz = (profile.PreFermentationGallons * gravityCorrectionFactor * ibuRemaining) / (recipe.BitteringHop.Utilization() * recipe.BitteringHop.AlphaAcid * 7489)
 	}
 
 	//calculate color
 	srm := 0.0
-	for _, fermentable := range fermentablesB {
-		mcu := (fermentable.Oz / 16) * targetBatchGallons
+	for _, fermentable := range recipe.Fermentables {
+		mcu := (fermentable.Oz / 16) * profile.BrewhouseEfficiency
 		srm += 1.4922 * (math.Pow(mcu, 0.6859))
 	}
 
 	//debug print
 	fmt.Println("OUTPUT----------------------------")
-	for _, ingredient := range fermentablesB {
+	for _, ingredient := range recipe.Fermentables {
 		fmt.Println(ingredient.Name, ": ", ingredient.Oz, "oz")
 	}
 
 	fmt.Println("\nSRM: ", srm)
-	fmt.Println("\n", bitteringHop.Name, ": ", bitteringHop.Oz, "oz ", bitteringHop.BoilTime, "min")
-	for _, hop := range flavorAromaHops {
+	fmt.Println("\n", recipe.BitteringHop.Name, ": ", recipe.BitteringHop.Oz, "oz ", recipe.BitteringHop.BoilTime, "min")
+	for _, hop := range recipe.FlavorAromaHops {
 		fmt.Println(hop.Name, ": ", hop.Oz, "oz ", hop.BoilTime, "min")
 	}
 }
