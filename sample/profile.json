@@ -1,0 +1,5 @@
+{
+    "targetBatchGallons": 2.5,
+	"preFermentationGallons": 6.0,
+	"brewhouseEfficiency": 0.75
+}

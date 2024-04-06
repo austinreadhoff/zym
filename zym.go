@@ -1,85 +1,33 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"math"
+	"os"
 )
 
-func main() {
-	//equipment profile
-	var profile EquipmentProfile
-	profile.BrewhouseEfficiency = 2.5
-	profile.PreFermentationGallons = 6.0
-	profile.BrewhouseEfficiency = 0.75
-
-	//recipe
-	var recipe Recipe
-	recipe.OG = 1.06
-	recipe.IBU = 45.0
-
-	recipe.Fermentables = append(recipe.Fermentables, Fermentable{
-		Name:    "2-Row",
-		Yield:   36,
-		Percent: 0.875,
-		Color:   2,
-		Mash:    true,
-	})
-	recipe.Fermentables = append(recipe.Fermentables, Fermentable{
-		Name:    "Victory",
-		Yield:   34,
-		Percent: 0.05,
-		Color:   25,
-		Mash:    true,
-	})
-	recipe.Fermentables = append(recipe.Fermentables, Fermentable{
-		Name:    "Crystal 40",
-		Yield:   34,
-		Percent: 0.025,
-		Color:   40,
-		Mash:    true,
-	})
-	recipe.Fermentables = append(recipe.Fermentables, Fermentable{
-		Name:    "Crystal 80",
-		Yield:   34,
-		Percent: 0.025,
-		Color:   80,
-		Mash:    true,
-	})
-	recipe.Fermentables = append(recipe.Fermentables, Fermentable{
-		Name:    "Carapils",
-		Yield:   33,
-		Percent: 0.025,
-		Color:   2,
-		Mash:    true,
-	})
-
-	recipe.BitteringHop = Hop{
-		Name:      "Cascade",
-		AlphaAcid: 0.052,
-		BoilTime:  60,
+func LoadJSON[T any](path string) T {
+	var output T
+	content, err := os.ReadFile(path)
+	if err != nil {
+		log.Println("failure reading file: ", path, ".  Error: ", err)
+	}
+	err = json.Unmarshal(content, &output)
+	if err != nil {
+		log.Println("failure parsing json as object: ", path, ".  Error: ", err)
 	}
 
-	recipe.FlavorAromaHops = append(recipe.FlavorAromaHops, Hop{
-		Name:      "Cascade",
-		AlphaAcid: 0.052,
-		Oz:        1.0,
-		BoilTime:  20,
-	})
-	recipe.FlavorAromaHops = append(recipe.FlavorAromaHops, Hop{
-		Name:      "Cascade",
-		AlphaAcid: 0.052,
-		Oz:        0.5,
-		BoilTime:  10,
-	})
-	recipe.FlavorAromaHops = append(recipe.FlavorAromaHops, Hop{
-		Name:      "Cascade",
-		AlphaAcid: 0.052,
-		Oz:        0.5,
-		BoilTime:  2,
-	})
+	return output
+}
+
+func main() {
+	profile := LoadJSON[EquipmentProfile]("./sample/profile.json")
+	recipe := LoadJSON[Recipe]("./sample/recipe.json")
 
 	//calculate grain bill
-	gravityUnits := (recipe.OG - 1) * 1000 * profile.BrewhouseEfficiency
+	gravityUnits := (recipe.OG - 1) * 1000 * profile.TargetBatchGallons
 
 	for i, fermentable := range recipe.Fermentables {
 		fermentableUnits := fermentable.Percent * float64(gravityUnits)
@@ -111,7 +59,7 @@ func main() {
 	//calculate color
 	srm := 0.0
 	for _, fermentable := range recipe.Fermentables {
-		mcu := (fermentable.Oz / 16) * profile.BrewhouseEfficiency
+		mcu := (fermentable.Oz / 16) * profile.TargetBatchGallons
 		srm += 1.4922 * (math.Pow(mcu, 0.6859))
 	}
 

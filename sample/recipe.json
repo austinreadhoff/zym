@@ -1,0 +1,66 @@
+{
+    "og": 1.06,
+	"ibu": 45.0,
+	"fermentables": [
+        {
+            "Name": "2-Row",
+            "Yield": 36,
+            "Percent": 0.875,
+            "Color": 2,
+            "Mash": true
+        },
+        {
+            "Name": "Victory",
+            "Yield": 34,
+            "Percent": 0.05,
+            "Color": 25,
+            "Mash": true
+        },
+        {
+            "Name": "Crystal 40",
+            "Yield": 34,
+            "Percent": 0.025,
+            "Color": 40,
+            "Mash": true
+        },
+        {
+            "Name": "Crystal 80",
+            "Yield": 34,
+            "Percent": 0.025,
+            "Color": 80,
+            "Mash": true
+        },
+        {
+            "Name": "Carapils",
+            "Yield": 33,
+            "Percent": 0.025,
+            "Color": 2,
+            "Mash": true
+        }
+    ],
+	"bitteringHop": {
+        "name": "Cascade",
+        "alphaAcid": 0.052,
+        "boilTime": 60
+    },
+	"flavorAromaHops": [
+        {
+            "name": "Cascade",
+            "alphaAcid": 0.052,
+            "oz": 1.0,
+            "boilTime": 20
+        },
+        {
+            "name": "Cascade",
+            "alphaAcid": 0.052,
+            "oz": 0.5,
+            "boilTime": 10
+        },
+        {
+            "name": "Cascade",
+            "alphaAcid": 0.052,
+            "oz": 0.5,
+            "boilTime": 2
+        }
+    ]
+}
