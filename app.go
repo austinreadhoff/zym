@@ -1,30 +1,30 @@
 package main
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
-	"log"
 	"math"
-	"os"
+	"strings"
 )
 
-func LoadJSON[T any](path string) T {
-	var output T
-	content, err := os.ReadFile(path)
-	if err != nil {
-		log.Println("failure reading file: ", path, ".  Error: ", err)
-	}
-	err = json.Unmarshal(content, &output)
-	if err != nil {
-		log.Println("failure parsing json as object: ", path, ".  Error: ", err)
-	}
-
-	return output
+type App struct {
+	ctx context.Context
 }
 
-func main() {
-	profile := LoadJSON[EquipmentProfile]("./sample/profile.json")
-	recipe := LoadJSON[Recipe]("./sample/recipe.json")
+func NewApp() *App {
+	return &App{}
+}
+
+// startup is called when the app starts. The context is saved
+// so we can call the runtime methods
+func (a *App) startup(ctx context.Context) {
+	a.ctx = ctx
+}
+
+// Output read-friendly recipe
+func (a *App) OutputRecipe() string {
+	profile := LoadJSON[EquipmentProfile]("./SAMPLEDATA/profile.json")
+	recipe := LoadJSON[Recipe]("./SAMPLEDATA/recipe.json")
 
 	//calculate grain bill
 	gravityUnits := (recipe.OG - 1) * 1000 * profile.TargetBatchGallons
@@ -64,14 +64,19 @@ func main() {
 	}
 
 	//debug print
-	fmt.Println("OUTPUT----------------------------")
+	var output strings.Builder
+	output.WriteString("---FERMENTABLES---\n")
 	for _, ingredient := range recipe.Fermentables {
-		fmt.Println(ingredient.Name, ": ", ingredient.Oz, "oz")
+		output.WriteString(fmt.Sprintf("%s : %f oz\n", ingredient.Name, ingredient.Oz))
 	}
 
-	fmt.Println("\nSRM: ", srm)
-	fmt.Println("\n", recipe.BitteringHop.Name, ": ", recipe.BitteringHop.Oz, "oz ", recipe.BitteringHop.BoilTime, "min")
+	output.WriteString("\n---COLOR---\n")
+	output.WriteString(fmt.Sprintf("SRM: %f\n", srm))
+	output.WriteString("\n---HOPS---\n")
+	output.WriteString(fmt.Sprintf("%s : %f oz, %d min\n", recipe.BitteringHop.Name, recipe.BitteringHop.Oz, recipe.BitteringHop.BoilTime))
 	for _, hop := range recipe.FlavorAromaHops {
-		fmt.Println(hop.Name, ": ", hop.Oz, "oz ", hop.BoilTime, "min")
+		output.WriteString(fmt.Sprintf("%s : %f oz, %d min\n", hop.Name, hop.Oz, hop.BoilTime))
 	}
+
+	return output.String()
 }
