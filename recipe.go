@@ -1,6 +1,12 @@
 package main
 
 type Recipe struct {
+	Name    string
+	Style   string
+	Batches []Batch
+}
+
+type Batch struct {
 	OG              float64
 	IBU             float64
 	Fermentables    []Fermentable

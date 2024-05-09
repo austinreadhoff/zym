@@ -2,7 +2,7 @@ import {OutputRecipe} from '../wailsjs/go/main/App';
 
 window.outputRecipe = function () {
     try {
-        OutputRecipe()
+        OutputRecipe(0)
             .then((result) => {
                 document.getElementById("result")!.innerText = result;
             })
