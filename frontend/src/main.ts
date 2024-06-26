@@ -1,8 +1,29 @@
-import {OutputRecipe} from '../wailsjs/go/main/App';
+import {LoadRecipe, PrintRecipe} from '../wailsjs/go/main/App';
+import {main} from '../wailsjs/go/models';
 
-window.outputRecipe = function () {
+declare global {
+    interface Window {
+        loadRecipe: () => void;
+        printRecipe: (Recipe: main.Recipe, batch: number) => void;
+    }
+}
+
+window.loadRecipe = function () {
     try {
-        OutputRecipe(0)
+        LoadRecipe("./SAMPLEDATA/recipe.json")
+            .then((result) => {
+                window.printRecipe(result, 0);
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+    } catch (err) {
+        console.error(err);
+    }
+};
+window.printRecipe = function (recipe: main.Recipe, batch: number) {
+    try {
+        PrintRecipe(recipe, batch)
             .then((result) => {
                 document.getElementById("result")!.innerText = result;
             })
@@ -14,10 +35,4 @@ window.outputRecipe = function () {
     }
 };
 
-window.outputRecipe();
-
-declare global {
-    interface Window {
-        outputRecipe: () => void;
-    }
-}
+window.loadRecipe();

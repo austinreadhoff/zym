@@ -1,34 +1,34 @@
 package main
 
 type Recipe struct {
-	Name    string
-	Style   string
-	Batches []Batch
+	Name    string  `json:"name"`
+	Style   string  `json:"style"`
+	Batches []Batch `json:"batches"`
 }
 
 type Batch struct {
-	OG              float64
-	IBU             float64
-	Fermentables    []Fermentable
-	BitteringHop    Hop
-	FlavorAromaHops []Hop
+	OG              float64       `json:"og"`
+	IBU             float64       `json:"ibu"`
+	Fermentables    []Fermentable `json:"fermentables"`
+	BitteringHop    Hop           `json:"bitteringhop"`
+	FlavorAromaHops []Hop         `json:"flavorAromaHops"`
 }
 
 type Fermentable struct {
-	Name    string
-	Yield   int
-	Percent float64
-	Oz      float64
-	Color   int
-	Mash    bool
+	Name    string  `json:"name"`
+	Yield   int     `json:"yield"`
+	Percent float64 `json:"percent"`
+	Oz      float64 `json:"oz"`
+	Color   int     `json:"color"`
+	Mash    bool    `json:"mash"`
 }
 
 type Hop struct {
-	Name      string
-	AlphaAcid float64
-	Oz        float64
-	BoilTime  int
-	DryHop    bool
+	Name      string  `json:"name"`
+	AlphaAcid float64 `json:"alphaAcid"`
+	Oz        float64 `json:"oz"`
+	BoilTime  int     `json:"boilTime"`
+	DryHop    bool    `json:"dryHop"`
 }
 
 func (hop Hop) Utilization() float64 {

@@ -21,10 +21,13 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
+func (a *App) LoadRecipe(path string) Recipe {
+	return LoadJSON[Recipe](path)
+}
+
 // Output read-friendly recipe
-func (a *App) OutputRecipe(batchNo int) string {
+func (a *App) PrintRecipe(recipe Recipe, batchNo int) string {
 	profile := LoadJSON[EquipmentProfile]("./SAMPLEDATA/profile.json")
-	recipe := LoadJSON[Recipe]("./SAMPLEDATA/recipe.json")
 	batch := recipe.Batches[batchNo]
 
 	//calculate grain bill
