@@ -1,0 +1,138 @@
+package main
+
+import (
+	"log"
+	"net/http"
+	"os"
+	"time"
+
+	"github.com/austinreadhoff/zym/backend/models"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/joho/godotenv"
+
+	"golang.org/x/crypto/bcrypt"
+
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
+)
+
+var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
+var db *gorm.DB
+
+func main() {
+	envErr := godotenv.Load("backend/.env")
+	if envErr != nil {
+		log.Fatal("Error loading .env file: ", envErr)
+	}
+
+	var dbErr error
+	db, dbErr = gorm.Open(sqlite.Open("app.db"), &gorm.Config{})
+	if dbErr != nil {
+		log.Fatal("Failed to connect to database:", dbErr)
+	}
+
+	db.AutoMigrate(&models.User{})
+	seedUser()
+
+	router := gin.Default()
+	config := cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           24 * time.Hour,
+	}
+	router.Use(cors.New(config))
+
+	router.POST("/api/login", loginHandler)
+
+	protected := router.Group("/api")
+	protected.Use(authMiddleware())
+	{
+		router.GET("/api/hello", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{
+				"message": "Hello, World!",
+			})
+		})
+	}
+
+	router.Run(":" + os.Getenv("PORT"))
+}
+
+func seedUser() {
+	var user models.User
+	result := db.First(&user, "username = ?", "admin")
+	if result.Error != nil {
+		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.DefaultCost)
+		db.Create(&models.User{
+			Username: "admin",
+			Password: string(hashedPassword),
+		})
+		log.Println("Seeded user: admin / password")
+	}
+}
+
+func loginHandler(c *gin.Context) {
+	var credentials struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+
+	if err := c.BindJSON(&credentials); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	var user models.User
+	result := db.First(&user, "username = ?", credentials.Username)
+	if result.Error != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		return
+	}
+
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(credentials.Password))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		return
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"username": credentials.Username,
+		"exp":      jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+	})
+
+	tokenStr, err := token.SignedString(jwtSecret)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": tokenStr})
+}
+
+func authMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tokenStr := c.GetHeader("Authorization")
+		if tokenStr == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "No token provided"})
+			c.Abort()
+			return
+		}
+
+		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+			return jwtSecret, nil
+		})
+
+		if err != nil || !token.Valid {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}
