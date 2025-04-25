@@ -14,7 +14,7 @@ function Dashboard() {
   };
 
   useEffect(() => {
-    apiFetch('/api/hello')
+    apiFetch('/api/dashboard')
     .then((responseObj) => {
       setMessage(responseObj.data.message);
     });

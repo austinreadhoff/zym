@@ -10,6 +10,8 @@ type User struct {
 	ID       uuid.UUID `gorm:"type:uuid;primaryKey"`
 	Username string    `gorm:"uniqueIndex"`
 	Password string
+
+	Recipes []Recipe `gorm:"foreignKey:UserID"`
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {

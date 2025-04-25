@@ -17,25 +17,38 @@ import (
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 var db *gorm.DB
 
 func main() {
-	envErr := godotenv.Load("backend/.env")
+	envErr := godotenv.Load("./.env")
 	if envErr != nil {
 		log.Fatal("Error loading .env file: ", envErr)
 	}
 
 	var dbErr error
-	db, dbErr = gorm.Open(sqlite.Open("app.db"), &gorm.Config{})
+	db, dbErr = gorm.Open(sqlite.Open("../app.db"), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			SingularTable: true,
+		},
+	})
 	if dbErr != nil {
 		log.Fatal("Failed to connect to database:", dbErr)
 	}
 
-	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.User{},
+		&models.Fermentable{},
+		&models.Hop{},
+		&models.Style{},
+		&models.Recipe{},
+		&models.Batch{},
+		&models.BatchFermentable{},
+		&models.BatchHop{})
 	seedUser()
+	seedFromStaticDB()
 
 	router := gin.Default()
 	config := cors.Config{
@@ -53,7 +66,7 @@ func main() {
 	protected := router.Group("/api")
 	protected.Use(authMiddleware())
 	{
-		router.GET("/api/hello", func(c *gin.Context) {
+		router.GET("/api/dashboard", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{
 				"message": "Hello, World!",
 			})
@@ -73,6 +86,73 @@ func seedUser() {
 			Password: string(hashedPassword),
 		})
 		log.Println("Seeded user: admin / password")
+	}
+}
+
+func seedFromStaticDB() {
+	var staticDB *gorm.DB
+	var staticDBErr error
+	staticDB, staticDBErr = gorm.Open(sqlite.Open("../static.db"), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			SingularTable: true,
+		},
+	})
+	if staticDBErr != nil {
+		log.Fatal("Failed to connect to database:", staticDBErr)
+	}
+
+	var count int64
+	db.Model(&models.Style{}).Count(&count)
+	if count == 0 {
+		var sourceStyles []models.SourceStyle
+		staticDB.Find(&sourceStyles)
+
+		var styles []models.Style
+		for _, sourceStyle := range sourceStyles {
+			style := models.Style{
+				Name:  sourceStyle.Name,
+				Notes: sourceStyle.Notes,
+			}
+			styles = append(styles, style)
+		}
+
+		db.Create(&styles)
+	}
+	db.Model(&models.Fermentable{}).Count(&count)
+	if count == 0 {
+		var sourceFermentables []models.SourceFermentable
+		staticDB.Find(&sourceFermentables)
+
+		var fermentables []models.Fermentable
+		for _, sourceFermentable := range sourceFermentables {
+			fermentable := models.Fermentable{
+				Name:  sourceFermentable.Name,
+				Yield: sourceFermentable.Yield,
+				Color: sourceFermentable.Color,
+				Mash:  sourceFermentable.Mash,
+				Notes: sourceFermentable.Notes,
+			}
+			fermentables = append(fermentables, fermentable)
+		}
+
+		db.Create(&fermentables)
+	}
+	db.Model(&models.Hop{}).Count(&count)
+	if count == 0 {
+		var sourceHops []models.SourceHop
+		staticDB.Find(&sourceHops)
+
+		var hops []models.Hop
+		for _, sourceHop := range sourceHops {
+			hop := models.Hop{
+				Name:      sourceHop.Name,
+				AlphaAcid: sourceHop.AlphaAcid,
+				Notes:     sourceHop.Notes,
+			}
+			hops = append(hops, hop)
+		}
+
+		db.Create(&hops)
 	}
 }
 
