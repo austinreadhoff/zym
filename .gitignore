@@ -10,6 +10,7 @@ frontend/coverage
 frontend/build
 
 # misc
+app.db
 .DS_Store
 frontend/.env
 backend/.env
