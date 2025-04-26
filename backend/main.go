@@ -63,15 +63,16 @@ func main() {
 
 	router.POST("/api/login", loginHandler)
 
-	protected := router.Group("/api")
-	protected.Use(authMiddleware())
-	{
-		router.GET("/api/dashboard", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
-				"message": "Hello, World!",
-			})
+	protected := router.Group("/api", authMiddleware())
+	protected.GET("/dashboard", func(c *gin.Context) {
+		userid := c.MustGet("userid").(string)
+		var recipes []models.Recipe
+		db.Where("user_id = ?", userid).Find(&recipes)
+
+		c.JSON(http.StatusOK, gin.H{
+			"recipes": recipes,
 		})
-	}
+	})
 
 	router.Run(":" + os.Getenv("PORT"))
 }
@@ -181,8 +182,8 @@ func loginHandler(c *gin.Context) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": credentials.Username,
-		"exp":      jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+		"userid": user.ID,
+		"exp":    jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 	})
 
 	tokenStr, err := token.SignedString(jwtSecret)
@@ -205,13 +206,17 @@ func authMiddleware() gin.HandlerFunc {
 
 		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 			return jwtSecret, nil
-		})
+		}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 
 		if err != nil || !token.Valid {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			c.Abort()
 			return
 		}
+
+		claims := token.Claims.(jwt.MapClaims)
+		userid := claims["userid"].(string)
+		c.Set("userid", userid)
 
 		c.Next()
 	}

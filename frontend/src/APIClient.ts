@@ -7,7 +7,7 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
         ...options,
         headers: {
             ...(options.headers || {}),
-            Authorization: `Bearer ${token}`,
+            Authorization: `${token}`,
             'Content-Type': 'application/json'
         },
     });
