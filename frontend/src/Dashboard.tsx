@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
 import './App.css';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { apiFetch } from './APIClient';
 
 function Dashboard() {
-  const [message, setMessage] = React.useState("");
+  //TODO: create a type for recipes
+  const [recipes, setRecipes] = React.useState<any[]>([]);
 
   //TODO: export logout button and function to a common location
   const navigate = useNavigate();
@@ -14,16 +15,40 @@ function Dashboard() {
   };
 
   useEffect(() => {
-    apiFetch('/api/dashboard')
+    apiFetch('/api/recipes')
     .then((responseObj) => {
-      setMessage(responseObj.data.recipes);
+      setRecipes(responseObj.data.recipes);
     });
   }, []);
+
+  const handleNew = async () => {
+    apiFetch('/api/recipes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ }),
+    })
+    .then((responseObj) => {
+      if (responseObj.response.ok) {
+        navigate('/recipe/' + responseObj.data.id);
+      } 
+    });
+  };
 
   return (
     <div>
       <button onClick={handleLogout}>Logout</button>
-      <h1>{message}</h1>
+      <button onClick={handleNew}>New</button>
+      <h1>Recipes</h1>
+      <ul>
+        {recipes.length === 0 && <p>You haven't created any recipes</p>}
+        {recipes.map(recipe => (
+          <li key={recipe.ID}>
+            <Link to={`/recipe/${recipe.ID}`}>
+              {recipe.Name}
+            </Link>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

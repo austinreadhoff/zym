@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/austinreadhoff/zym/backend/models"
+	"github.com/google/uuid"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -64,13 +65,42 @@ func main() {
 	router.POST("/api/login", loginHandler)
 
 	protected := router.Group("/api", authMiddleware())
-	protected.GET("/dashboard", func(c *gin.Context) {
-		userid := c.MustGet("userid").(string)
+	//GET all recipes
+	protected.GET("/recipes", func(c *gin.Context) {
+		userID := c.MustGet("userid").(string)
 		var recipes []models.Recipe
-		db.Where("user_id = ?", userid).Find(&recipes)
+		db.Where("user_id = ?", userID).Find(&recipes)
 
 		c.JSON(http.StatusOK, gin.H{
 			"recipes": recipes,
+		})
+	})
+	//GET single recipe
+	protected.GET("/recipes/:id", func(c *gin.Context) {
+		recipeID := c.Param("id")
+		var recipe models.Recipe
+		db.First(&recipe, "id = ?", recipeID)
+
+		c.JSON(http.StatusOK, gin.H{
+			"recipe": recipe,
+		})
+	})
+	//ADD recipe
+	protected.POST("/recipes", func(c *gin.Context) {
+		userID := uuid.MustParse(c.MustGet("userid").(string))
+		newRecipe := &models.Recipe{Name: "New Recipe", UserID: userID}
+		db.Create(&newRecipe)
+		c.JSON(http.StatusOK, gin.H{
+			"id": newRecipe.ID,
+		})
+	})
+	//DELETE recipe
+	protected.DELETE("/recipes/:id", func(c *gin.Context) {
+		recipeID := uuid.MustParse(c.Param("id"))
+		db.Delete(&models.Recipe{}, recipeID)
+
+		c.JSON(http.StatusOK, gin.H{
+			"deletedID": recipeID,
 		})
 	})
 

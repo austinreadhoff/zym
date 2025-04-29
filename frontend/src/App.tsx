@@ -3,6 +3,7 @@ import './App.css';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import Login from './Login';
 import Dashboard from './Dashboard';
+import Recipe from './Recipe';
 
 function App() {
   const [authenticated, setAuthenticated] = React.useState(false);
@@ -22,6 +23,7 @@ function App() {
     <Routes>
       <Route path="/login" element={<Login onLogin={() => setAuthenticated(true)} />} />
       <Route path="/" element={authenticated ? <Dashboard /> : <Login onLogin={() => setAuthenticated(true)} />} />
+      <Route path="/recipe/:id" element={authenticated ? <Recipe /> : <Login onLogin={() => setAuthenticated(true)} />} />
     </Routes>
   );
 }
