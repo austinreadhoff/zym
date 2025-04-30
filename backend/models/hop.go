@@ -6,7 +6,6 @@ import (
 )
 
 type Hop struct {
-	gorm.Model
 	ID        uuid.UUID `gorm:"type:uuid;primaryKey"`
 	Name      string
 	AlphaAcid float64 `gorm:"column:alpha"`

@@ -6,7 +6,6 @@ import (
 )
 
 type Fermentable struct {
-	gorm.Model
 	ID    uuid.UUID `gorm:"type:uuid;primaryKey"`
 	Name  string
 	Yield float64

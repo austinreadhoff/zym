@@ -6,7 +6,6 @@ import (
 )
 
 type Style struct {
-	gorm.Model
 	ID    uuid.UUID `gorm:"type:uuid;primaryKey"`
 	Name  string
 	Notes string
