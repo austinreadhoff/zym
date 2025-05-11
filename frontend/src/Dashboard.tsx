@@ -2,10 +2,10 @@ import React, { useEffect } from 'react';
 import './App.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { apiFetch } from './APIClient';
+import Recipe from './models/recipe';
 
 function Dashboard() {
-  //TODO: create a type for recipes
-  const [recipes, setRecipes] = React.useState<any[]>([]);
+  const [recipes, setRecipes] = React.useState<Recipe[]>([]);
 
   //TODO: export logout button and function to a common location
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ function Dashboard() {
   useEffect(() => {
     apiFetch('/api/recipes')
     .then((responseObj) => {
-      setRecipes(responseObj.data.recipes);
+      setRecipes(Recipe.fromJSONList(responseObj.data.recipes));
     });
   }, []);
 

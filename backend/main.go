@@ -94,6 +94,23 @@ func main() {
 			"id": newRecipe.ID,
 		})
 	})
+	//UPDATE recipe
+	protected.PUT("/recipes/:id", func(c *gin.Context) {
+		recipeID := uuid.MustParse(c.Param("id"))
+		userID := uuid.MustParse(c.MustGet("userid").(string))
+
+		var input models.Recipe
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(400, gin.H{"error": "Invalid request body"})
+			return
+		}
+		input.ID = recipeID
+		input.UserID = userID
+
+		db.Save(input)
+
+		c.JSON(http.StatusOK, gin.H{})
+	})
 	//DELETE recipe
 	protected.DELETE("/recipes/:id", func(c *gin.Context) {
 		recipeID := uuid.MustParse(c.Param("id"))
