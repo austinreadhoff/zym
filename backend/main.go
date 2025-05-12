@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/austinreadhoff/zym/backend/models"
-	"github.com/google/uuid"
+	"github.com/austinreadhoff/zym/controllers"
+	"github.com/austinreadhoff/zym/models"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -65,60 +65,20 @@ func main() {
 	router.POST("/api/login", loginHandler)
 
 	protected := router.Group("/api", authMiddleware())
-	//GET all recipes
 	protected.GET("/recipes", func(c *gin.Context) {
-		userID := c.MustGet("userid").(string)
-		var recipes []models.Recipe
-		db.Where("user_id = ?", userID).Find(&recipes)
-
-		c.JSON(http.StatusOK, gin.H{
-			"recipes": recipes,
-		})
+		controllers.GetRecipes(c, db)
 	})
-	//GET single recipe
 	protected.GET("/recipes/:id", func(c *gin.Context) {
-		recipeID := c.Param("id")
-		var recipe models.Recipe
-		db.First(&recipe, "id = ?", recipeID)
-
-		c.JSON(http.StatusOK, gin.H{
-			"recipe": recipe,
-		})
+		controllers.GetRecipe(c, db)
 	})
-	//ADD recipe
 	protected.POST("/recipes", func(c *gin.Context) {
-		userID := uuid.MustParse(c.MustGet("userid").(string))
-		newRecipe := &models.Recipe{Name: "New Recipe", UserID: userID}
-		db.Create(&newRecipe)
-		c.JSON(http.StatusOK, gin.H{
-			"id": newRecipe.ID,
-		})
+		controllers.AddRecipe(c, db)
 	})
-	//UPDATE recipe
 	protected.PUT("/recipes/:id", func(c *gin.Context) {
-		recipeID := uuid.MustParse(c.Param("id"))
-		userID := uuid.MustParse(c.MustGet("userid").(string))
-
-		var input models.Recipe
-		if err := c.ShouldBindJSON(&input); err != nil {
-			c.JSON(400, gin.H{"error": "Invalid request body"})
-			return
-		}
-		input.ID = recipeID
-		input.UserID = userID
-
-		db.Save(input)
-
-		c.JSON(http.StatusOK, gin.H{})
+		controllers.UpdateRecipe(c, db)
 	})
-	//DELETE recipe
 	protected.DELETE("/recipes/:id", func(c *gin.Context) {
-		recipeID := uuid.MustParse(c.Param("id"))
-		db.Delete(&models.Recipe{}, recipeID)
-
-		c.JSON(http.StatusOK, gin.H{
-			"deletedID": recipeID,
-		})
+		controllers.DeleteRecipe(c, db)
 	})
 
 	router.Run(":" + os.Getenv("PORT"))
