@@ -65,6 +65,8 @@ func main() {
 	router.POST("/api/login", loginHandler)
 
 	protected := router.Group("/api", authMiddleware())
+
+	//Recipe routes
 	protected.GET("/recipes", func(c *gin.Context) {
 		controllers.GetRecipes(c, db)
 	})
@@ -79,6 +81,11 @@ func main() {
 	})
 	protected.DELETE("/recipes/:id", func(c *gin.Context) {
 		controllers.DeleteRecipe(c, db)
+	})
+
+	//Misc Routes
+	protected.GET("/styles", func(c *gin.Context) {
+		controllers.GetStyles(c, db)
 	})
 
 	router.Run(":" + os.Getenv("PORT"))

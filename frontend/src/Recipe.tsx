@@ -1,14 +1,19 @@
 import React, { useCallback, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import _, { set } from 'lodash';
+import { Typeahead } from 'react-bootstrap-typeahead';
 import './App.css';
 import { apiFetch } from './APIClient';
-import { useNavigate, useParams } from 'react-router-dom';
 import mdlRecipe from './models/recipe';
-import _, { set } from 'lodash';
+import Style from './models/style';
 
 function Recipe() {
   const id = useParams().id;
   const [initialLoad, setInitialLoad] = React.useState(true);
   const [recipe, setRecipe] = React.useState<mdlRecipe>(new mdlRecipe());
+
+  const [styles, setStyles] = React.useState<Style[]>([]);
+  const [selectedStyle, setSelectedStyle] = React.useState<Style[]>([]);
   
   const navigate = useNavigate();
 
@@ -32,12 +37,23 @@ function Recipe() {
     []
   );
 
-  const handleRecipeChange =  (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+  const handleNameChange =  (e: React.ChangeEvent<HTMLInputElement>) => {
     setRecipe(prevData => ({
       ...prevData,
-      [name]: value,
+      Name: e.target.value,
     }))
+  }
+  const handleStyleChange = (selected: any) => {
+    if (selected.length === 0) {
+      setSelectedStyle([]);
+      return;
+    }
+
+    setSelectedStyle(selected);
+    setRecipe(prevData => ({
+      ...prevData,
+      StyleID: selected[0].ID
+    }));
   }
 
   const handleDelete = async () => {
@@ -53,14 +69,23 @@ function Recipe() {
 
   useEffect(() => {
     //load initial data
-    apiFetch('/api/recipes/' + id)
-    .then((responseObj) => {
-      setRecipe(mdlRecipe.fromJSON(responseObj.data.recipe));
+    Promise.all([
+      apiFetch('/api/recipes/' + id),
+      apiFetch('/api/styles')
+    ]).then(([recipeResponse, stylesResponse]) => {
+      setRecipe(mdlRecipe.fromJSON(recipeResponse.data.recipe));
+      setStyles(Style.fromJSONList(stylesResponse.data.styles));
+      setSelectedStyle(
+        Style.fromJSONList(stylesResponse.data.styles).filter(
+          (style) => style.ID === recipeResponse.data.recipe.StyleID
+        )
+      );
       setTimeout(() => {
+        //TODO: This prevents very quick edits from being saved, find different workaround
         setInitialLoad(false);
       }, 1500);
     });
-
+    
     //cleanup
     return () => {
       debouncedSave.cancel();
@@ -83,7 +108,14 @@ function Recipe() {
           type="text"
           name="Name"
           value={recipe.Name} 
-          onChange={handleRecipeChange}
+          onChange={handleNameChange}
+        />
+        <Typeahead
+          labelKey="Name"
+          onChange={handleStyleChange}
+          options={styles}
+          placeholder="Style"
+          selected={selectedStyle}
         />
       </form>
     </div>
