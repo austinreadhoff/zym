@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import _, { set } from 'lodash';
-import { Typeahead } from 'react-bootstrap-typeahead';
+import _ from 'lodash';
 import './App.css';
 import { apiFetch } from './APIClient';
 import mdlRecipe from './models/recipe';
@@ -13,7 +12,6 @@ function Recipe() {
   const [recipe, setRecipe] = React.useState<mdlRecipe>(new mdlRecipe());
 
   const [styles, setStyles] = React.useState<Style[]>([]);
-  const [selectedStyle, setSelectedStyle] = React.useState<Style[]>([]);
   
   const navigate = useNavigate();
 
@@ -37,22 +35,11 @@ function Recipe() {
     []
   );
 
-  const handleNameChange =  (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleRecipeChange =  (e: any) => {
+    const { name, value } = e.target;
     setRecipe(prevData => ({
       ...prevData,
-      Name: e.target.value,
-    }))
-  }
-  const handleStyleChange = (selected: any) => {
-    if (selected.length === 0) {
-      setSelectedStyle([]);
-      return;
-    }
-
-    setSelectedStyle(selected);
-    setRecipe(prevData => ({
-      ...prevData,
-      StyleID: selected[0].ID
+      [name]: value,
     }));
   }
 
@@ -74,12 +61,12 @@ function Recipe() {
       apiFetch('/api/styles')
     ]).then(([recipeResponse, stylesResponse]) => {
       setRecipe(mdlRecipe.fromJSON(recipeResponse.data.recipe));
-      setStyles(Style.fromJSONList(stylesResponse.data.styles));
-      setSelectedStyle(
-        Style.fromJSONList(stylesResponse.data.styles).filter(
-          (style) => style.ID === recipeResponse.data.recipe.StyleID
+      setStyles(
+        Style.fromJSONList(stylesResponse.data.styles).sort((a, b) =>
+          a.Name.localeCompare(b.Name)
         )
       );
+
       setTimeout(() => {
         //TODO: This prevents very quick edits from being saved, find different workaround
         setInitialLoad(false);
@@ -108,15 +95,22 @@ function Recipe() {
           type="text"
           name="Name"
           value={recipe.Name} 
-          onChange={handleNameChange}
+          onChange={handleRecipeChange}
         />
-        <Typeahead
-          labelKey="Name"
-          onChange={handleStyleChange}
-          options={styles}
-          placeholder="Style"
-          selected={selectedStyle}
-        />
+        <select
+          value={recipe.StyleID || ''}
+          onChange={(e: any) => {
+            recipe.StyleID = e.target.value;
+            handleRecipeChange(e);
+          }}
+        >
+          <option value="">Select a style</option>
+          {styles.map(style => (
+            <option key={style.ID} value={style.ID}>
+              {style.Name}
+            </option>
+          ))}
+        </select>
       </form>
     </div>
   );
