@@ -83,6 +83,17 @@ func main() {
 		controllers.DeleteRecipe(c, db)
 	})
 
+	//Batch routes
+	protected.POST("/batches", func(c *gin.Context) {
+		controllers.AddBatch(c, db)
+	})
+	protected.PUT("/batches/:id", func(c *gin.Context) {
+		controllers.UpdateBatch(c, db)
+	})
+	protected.DELETE("/batches/:id", func(c *gin.Context) {
+		controllers.DeleteBatch(c, db)
+	})
+
 	//Misc Routes
 	protected.GET("/styles", func(c *gin.Context) {
 		controllers.GetStyles(c, db)

@@ -21,18 +21,28 @@ func GetRecipes(c *gin.Context, db *gorm.DB) {
 
 func GetRecipe(c *gin.Context, db *gorm.DB) {
 	recipeID := c.Param("id")
+
 	var recipe models.Recipe
 	db.First(&recipe, "id = ?", recipeID)
 
+	var batches []models.Batch
+	db.Where("recipe_id = ?", recipe.ID).Find(&batches)
+
 	c.JSON(http.StatusOK, gin.H{
-		"recipe": recipe,
+		"recipe":  recipe,
+		"batches": batches,
 	})
 }
 
 func AddRecipe(c *gin.Context, db *gorm.DB) {
 	userID := uuid.MustParse(c.MustGet("userid").(string))
+
 	newRecipe := &models.Recipe{Name: "New Recipe", UserID: userID}
 	db.Create(&newRecipe)
+
+	newBatch := &models.Batch{RecipeID: newRecipe.ID, Number: 1}
+	db.Create(&newBatch)
+
 	c.JSON(http.StatusOK, gin.H{
 		"id": newRecipe.ID,
 	})
@@ -57,6 +67,8 @@ func UpdateRecipe(c *gin.Context, db *gorm.DB) {
 
 func DeleteRecipe(c *gin.Context, db *gorm.DB) {
 	recipeID := uuid.MustParse(c.Param("id"))
+
+	db.Where("recipe_id = ?", recipeID).Delete(&models.Batch{})
 	db.Delete(&models.Recipe{}, recipeID)
 
 	c.JSON(http.StatusOK, gin.H{
