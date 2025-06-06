@@ -1,21 +1,22 @@
-import React, { useCallback, useEffect } from 'react';
-import _, { set } from 'lodash';
+import React, { useEffect, useCallback } from 'react';
+import _ from 'lodash';
 import './App.css';
 import { apiFetch } from './APIClient';
 import mdlBatch from './models/batch';
 
 type BatchProps = {
   batchIn: mdlBatch;
+  onBatchChange?: (updatedBatch: mdlBatch) => void;
+  onBatchDelete?: () => void;
+  disableDelete?: boolean;
 }
 
-function Batch({ batchIn }: BatchProps) {
-  const [batch, setBatch] = React.useState<mdlBatch>(batchIn);
-
+function Batch({ batchIn, onBatchChange, onBatchDelete, disableDelete }: BatchProps) {
   const debouncedSave = useCallback(
-    _.debounce(async (batchJSON) => {   
+    _.debounce(async (batchJSON) => {
       console.log("saving batch");  //TODO
       try {
-        await apiFetch('/api/batches/' + batch.ID, {
+        await apiFetch('/api/batches/' + batchIn.ID, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -25,66 +26,53 @@ function Batch({ batchIn }: BatchProps) {
       } catch (error) {
         console.error("Auto-save failed:", error);
       } finally {
-        console.log("saved batch"); //TODO
+        console.log("saved batch");  //TODO
       }
     }, 1500),
-    []
+    [batchIn.ID]
   );
 
-  const handleBatchChange =  (e: any) => {
-    const { name, value } = e.target;
-    setBatch(prevData => ({
-      ...prevData,
-      [name]: value,
-    }));
-  }
-
-  const handleDelete = async () => {
-    // apiFetch('/api/recipes/' + id, {
-    //   method: 'DELETE'
-    // })
-    // .then((responseObj) => {
-    //   if (responseObj.response.ok) {
-    //     navigate('/');
-    //   } 
-    // });
-  };
-
-  useEffect(() => {    
-    //cleanup
+  useEffect(() => {
+    const batchToSave = {
+      ...batchIn,
+      IBU: batchIn.IBU !== undefined ? Number(batchIn.IBU) : batchIn.IBU,
+      OG: batchIn.OG !== undefined ? Number(batchIn.OG) : batchIn.OG,
+    };
+    debouncedSave(JSON.stringify(batchToSave));
     return () => {
       debouncedSave.cancel();
     };
-  }, [debouncedSave]);
+  }, [batchIn, debouncedSave]);
 
-  useEffect(() => {
-    // Ensure IBU and OG are numbers in the JSON
-    const batchToSave = {
-      ...batch,
-      IBU: batch.IBU !== undefined ? Number(batch.IBU) : batch.IBU,
-      OG: batch.OG !== undefined ? Number(batch.OG) : batch.OG,
+  const handleBatchChange = (e: any) => {
+    const { name, value } = e.target;
+    const updatedBatch = {
+      ...batchIn,
+      [name]: value,
     };
-    debouncedSave(JSON.stringify(batchToSave));
-  }, [batch]);
+    if (onBatchChange) {
+      onBatchChange(updatedBatch);
+    }
+  };
 
   return (
     <div>
-      <button onClick={handleDelete}>Delete</button>
+      <button onClick={onBatchDelete} disabled={disableDelete}>Delete</button>
       <div style={{ border: '1px solid #ccc', padding: 12, marginBottom: 8 }}>
-        Batch #{String(batch.Number)} (details go here)
+        Batch #{String(batchIn.Number)} (details go here)
       </div>
       <input 
-          type="string"
-          name="OG"
-          value={batch.OG} 
-          onChange={handleBatchChange}
-        />
-        <input 
-          type="string"
-          name="IBU"
-          value={batch.IBU} 
-          onChange={handleBatchChange}
-        />
+        type="string"
+        name="OG"
+        value={batchIn.OG} 
+        onChange={handleBatchChange}
+      />
+      <input 
+        type="string"
+        name="IBU"
+        value={batchIn.IBU} 
+        onChange={handleBatchChange}
+      />
     </div>
   );
 }

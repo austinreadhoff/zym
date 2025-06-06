@@ -47,6 +47,25 @@ function Recipe() {
     }));
   }
 
+  const handleBatchChange = (idx: number, updatedBatch: mdlBatch) => {
+    setBatches(prev => prev.map((batch, i) => (i === idx ? updatedBatch : batch)));
+  };
+
+  const handleBatchDelete = (idx: number) => {
+    const batchToDelete = batches[idx];
+    apiFetch('/api/batches/' + batchToDelete.ID, {
+      method: 'DELETE',
+    }).then((responseObj) => {
+      if (responseObj.response.ok) {
+        setBatches(prev => {
+          const newBatches = prev.filter((_, i) => i !== idx);
+          setSelectedBatchIndex(idx === 0 ? 0 : idx - 1);
+          return newBatches;
+        });
+      }
+    });
+  };
+
   const handleDelete = async () => {
     apiFetch('/api/recipes/' + id, {
       method: 'DELETE'
@@ -57,6 +76,20 @@ function Recipe() {
       } 
     });
   };
+
+  const addBatch = async () => {
+    apiFetch('/api/batches', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ recipeID: id }),
+    })
+    .then((responseObj) => {
+      if (responseObj.response.ok) {
+        setBatches(prev => [...prev, mdlBatch.fromJSON(responseObj.data.batch)]);
+        setSelectedBatchIndex(i => i + 1);
+      } 
+    });
+  }
 
   useEffect(() => {
     //load initial data
@@ -120,7 +153,7 @@ function Recipe() {
           <button
             type="button"
             disabled={batches.length === 0 || selectedBatchIndex === 0}
-            onClick={() => setSelectedBatchIndex(i => Math.max(i - 1, 0))}
+            onClick={() => setSelectedBatchIndex(i => i - 1)}
           >
             &#8592; Back
           </button>
@@ -133,7 +166,7 @@ function Recipe() {
             <button
               type="button"
               onClick={() => {
-                // TODO: Implement create new batch functionality
+                addBatch();
               }}
             >
               + New Batch
@@ -141,8 +174,7 @@ function Recipe() {
           ) : (
             <button
               type="button"
-              // disabled={batches.length === 0 || selectedBatchIndex >= batches.length - 1}
-              onClick={() => setSelectedBatchIndex(i => Math.min(i + 1, batches.length - 1))}
+              onClick={() => setSelectedBatchIndex(i => i + 1)}
             >
               Next &#8594;
             </button>
@@ -151,7 +183,13 @@ function Recipe() {
         <div>
           {batches.map((batch, idx) =>
             idx === selectedBatchIndex ? (
-              <Batch key={idx} batchIn={batch} />
+              <Batch
+                key={idx}
+                batchIn={batch}
+                onBatchChange={updatedBatch => handleBatchChange(idx, updatedBatch)}
+                onBatchDelete={() => handleBatchDelete(idx)}
+                disableDelete={batches.length === 1}
+              />
             ) : null
           )}
         </div>

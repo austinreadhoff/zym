@@ -10,9 +10,26 @@ import (
 )
 
 func AddBatch(c *gin.Context, db *gorm.DB) {
-	recipeID := uuid.MustParse(c.Param("id"))
-	newBatch := &models.Batch{RecipeID: recipeID, Number: 1}
+	var body struct {
+		RecipeID uuid.UUID `json:"recipeID"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	recipeID := body.RecipeID
+	var maxNumber int
+	db.Model(&models.Batch{}).
+		Where("recipe_id = ?", body.RecipeID).
+		Select("COALESCE(MAX(number), 0)").
+		Scan(&maxNumber)
+
+	newBatch := &models.Batch{RecipeID: recipeID, Number: maxNumber + 1}
 	db.Create(&newBatch)
+	c.JSON(http.StatusOK, gin.H{
+		"batch": newBatch,
+	})
 }
 
 func UpdateBatch(c *gin.Context, db *gorm.DB) {
