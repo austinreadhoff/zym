@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import './App.css';
+import '../App.css';
 import { useNavigate } from 'react-router-dom';
-import { apiFetch } from './APIClient';
+import { apiFetch } from '../APIClient';
 
 type LoginProps = {
   onLogin: () => void;

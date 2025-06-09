@@ -1,8 +1,8 @@
 import React, { useEffect, useCallback } from 'react';
 import _ from 'lodash';
-import './App.css';
-import { apiFetch } from './APIClient';
-import mdlBatch from './models/batch';
+import '../App.css';
+import { apiFetch } from '../APIClient';
+import mdlBatch from '../models/batch';
 
 type BatchProps = {
   batchIn: mdlBatch;

@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import './App.css';
 import { Route, Routes, useNavigate } from 'react-router-dom';
-import Login from './Login';
-import Dashboard from './Dashboard';
-import Recipe from './Recipe';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Recipe from './pages/Recipe';
 
 function App() {
   const [authenticated, setAuthenticated] = React.useState(false);

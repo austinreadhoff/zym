@@ -1,16 +1,15 @@
 import React, { useCallback, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import _ from 'lodash';
-import './App.css';
-import { apiFetch } from './APIClient';
-import Batch from './Batch';
-import mdlRecipe from './models/recipe';
-import Style from './models/style';
-import mdlBatch from './models/batch';
+import '../App.css';
+import { apiFetch } from '../APIClient';
+import Batch from '../components/Batch';
+import mdlRecipe from '../models/recipe';
+import Style from '../models/style';
+import mdlBatch from '../models/batch';
 
 function Recipe() {
   const id = useParams().id;
-  const [initialLoad, setInitialLoad] = React.useState(true);
   const [recipe, setRecipe] = React.useState<mdlRecipe>(new mdlRecipe());
   const [batches, setBatches] = React.useState<mdlBatch[]>([]);
   const [selectedBatchIndex, setSelectedBatchIndex] = React.useState(0);
@@ -104,11 +103,6 @@ function Recipe() {
           a.Name.localeCompare(b.Name)
         )
       );
-
-      setTimeout(() => {
-        //TODO: This prevents very quick edits from being saved, find different workaround
-        setInitialLoad(false);
-      }, 1500);
     });
     
     //cleanup
@@ -118,10 +112,6 @@ function Recipe() {
   }, [debouncedSave]);
 
   useEffect(() => {
-    if (initialLoad) {
-      return;
-    }
-
     debouncedSave(JSON.stringify(recipe));
   }, [recipe]);
 

@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
-import './App.css';
+import '../App.css';
 import { Link, useNavigate } from 'react-router-dom';
-import { apiFetch } from './APIClient';
-import Recipe from './models/recipe';
+import { apiFetch } from '../APIClient';
+import Recipe from '../models/recipe';
 
 function Dashboard() {
   const [recipes, setRecipes] = React.useState<Recipe[]>([]);
