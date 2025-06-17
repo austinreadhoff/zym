@@ -98,6 +98,12 @@ func main() {
 	protected.GET("/styles", func(c *gin.Context) {
 		controllers.GetStyles(c, db)
 	})
+	protected.GET("/fermentables", func(c *gin.Context) {
+		controllers.GetFermentables(c, db)
+	})
+	protected.GET("/hops", func(c *gin.Context) {
+		controllers.GetHops(c, db)
+	})
 
 	router.Run(":" + os.Getenv("PORT"))
 }

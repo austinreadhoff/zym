@@ -42,7 +42,7 @@ func UpdateBatch(c *gin.Context, db *gorm.DB) {
 	}
 	input.ID = batchID
 
-	db.Save(input)
+	db.Model(&models.Batch{}).Where("id = ?", batchID).Select("og", "ibu").Updates(input)
 
 	c.JSON(http.StatusOK, gin.H{})
 }

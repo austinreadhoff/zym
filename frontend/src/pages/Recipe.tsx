@@ -7,6 +7,7 @@ import Batch from '../components/Batch';
 import mdlRecipe from '../models/recipe';
 import Style from '../models/style';
 import mdlBatch from '../models/batch';
+import { Fermentable, Hop } from '../models/batch';
 
 function Recipe() {
   const id = useParams().id;
@@ -15,6 +16,8 @@ function Recipe() {
   const [selectedBatchIndex, setSelectedBatchIndex] = React.useState(0);
 
   const [styles, setStyles] = React.useState<Style[]>([]);
+  const [fermentables, setFermentables] = React.useState<Fermentable[]>([]);
+  const [hops, setHops] = React.useState<Hop[]>([]);
   
   const navigate = useNavigate();
 
@@ -94,12 +97,24 @@ function Recipe() {
     //load initial data
     Promise.all([
       apiFetch('/api/recipes/' + id),
-      apiFetch('/api/styles')
-    ]).then(([recipeResponse, stylesResponse]) => {
+      apiFetch('/api/styles'),
+      apiFetch('/api/fermentables'),
+      apiFetch('/api/hops')
+    ]).then(([recipeResponse, stylesResponse, fermentablesResponse, hopsResponse]) => {
       setRecipe(mdlRecipe.fromJSON(recipeResponse.data.recipe));
       setBatches(mdlBatch.fromJSONList(recipeResponse.data.batches));
       setStyles(
         Style.fromJSONList(stylesResponse.data.styles).sort((a, b) =>
+          a.Name.localeCompare(b.Name)
+        )
+      );
+      setFermentables(
+        Fermentable.fromJSONList(fermentablesResponse.data.fermentables).sort((a, b) =>
+          a.Name.localeCompare(b.Name)
+        )
+      );
+      setHops(
+        Hop.fromJSONList(hopsResponse.data.hops).sort((a, b) =>
           a.Name.localeCompare(b.Name)
         )
       );

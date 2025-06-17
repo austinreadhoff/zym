@@ -28,9 +28,63 @@ func GetRecipe(c *gin.Context, db *gorm.DB) {
 	var batches []models.Batch
 	db.Where("recipe_id = ?", recipe.ID).Find(&batches)
 
+	type HopWithAmount struct {
+		models.Hop
+		Amount      float64
+		BoilMinutes int64
+		DryHop      bool
+	}
+	type FermentableWithAmount struct {
+		models.Fermentable
+		Amount float64
+	}
+	type BatchResponse struct {
+		models.Batch
+		Hops         []HopWithAmount
+		Fermentables []FermentableWithAmount
+	}
+
+	var batchResponses []BatchResponse
+
+	for _, batch := range batches {
+		var batchHops []models.BatchHop
+		db.Where("batch_id = ?", batch.ID).Find(&batchHops)
+
+		hopsWithAmount := make([]HopWithAmount, 0, len(batchHops))
+		for _, bh := range batchHops {
+			var hop models.Hop
+			db.First(&hop, "id = ?", bh.HopID)
+			hopsWithAmount = append(hopsWithAmount, HopWithAmount{
+				Hop:         hop,
+				Amount:      bh.Amount,
+				BoilMinutes: bh.BoilMinutes,
+				DryHop:      bh.DryHop,
+			})
+		}
+
+		var batchFermentables []models.BatchFermentable
+		db.Where("batch_id = ?", batch.ID).Find(&batchFermentables)
+
+		fermentablesWithAmount := make([]FermentableWithAmount, 0, len(batchFermentables))
+		for _, bf := range batchFermentables {
+			var ferm models.Fermentable
+			db.First(&ferm, "id = ?", bf.FermentableID)
+			fermentablesWithAmount = append(fermentablesWithAmount, FermentableWithAmount{
+				Fermentable: ferm,
+				Amount:      bf.Amount,
+			})
+		}
+
+		batchResponses = append(batchResponses, BatchResponse{
+			Batch:        batch,
+			Hops:         hopsWithAmount,
+			Fermentables: fermentablesWithAmount,
+		})
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"recipe":  recipe,
-		"batches": batches,
+		"batches": batchResponses,
 	})
 }
 
