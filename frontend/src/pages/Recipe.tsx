@@ -194,6 +194,8 @@ function Recipe() {
                 onBatchChange={updatedBatch => handleBatchChange(idx, updatedBatch)}
                 onBatchDelete={() => handleBatchDelete(idx)}
                 disableDelete={batches.length === 1}
+                hops={hops}
+                fermentables={fermentables}
               />
             ) : null
           )}

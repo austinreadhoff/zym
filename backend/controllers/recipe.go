@@ -28,33 +28,18 @@ func GetRecipe(c *gin.Context, db *gorm.DB) {
 	var batches []models.Batch
 	db.Where("recipe_id = ?", recipe.ID).Find(&batches)
 
-	type HopWithAmount struct {
-		models.Hop
-		Amount      float64
-		BoilMinutes int64
-		DryHop      bool
-	}
-	type FermentableWithAmount struct {
-		models.Fermentable
-		Amount float64
-	}
-	type BatchResponse struct {
-		models.Batch
-		Hops         []HopWithAmount
-		Fermentables []FermentableWithAmount
-	}
-
-	var batchResponses []BatchResponse
+	var batchResponses []models.BatchWithMetaData
 
 	for _, batch := range batches {
 		var batchHops []models.BatchHop
 		db.Where("batch_id = ?", batch.ID).Find(&batchHops)
 
-		hopsWithAmount := make([]HopWithAmount, 0, len(batchHops))
+		hopsWithAmount := make([]models.BatchHopWithMetadata, 0, len(batchHops))
 		for _, bh := range batchHops {
 			var hop models.Hop
 			db.First(&hop, "id = ?", bh.HopID)
-			hopsWithAmount = append(hopsWithAmount, HopWithAmount{
+			hopsWithAmount = append(hopsWithAmount, models.BatchHopWithMetadata{
+				BatchHopID:  bh.BatchHopID,
 				Hop:         hop,
 				Amount:      bh.Amount,
 				BoilMinutes: bh.BoilMinutes,
@@ -65,17 +50,18 @@ func GetRecipe(c *gin.Context, db *gorm.DB) {
 		var batchFermentables []models.BatchFermentable
 		db.Where("batch_id = ?", batch.ID).Find(&batchFermentables)
 
-		fermentablesWithAmount := make([]FermentableWithAmount, 0, len(batchFermentables))
+		fermentablesWithAmount := make([]models.BatchFermentableWithMetadata, 0, len(batchFermentables))
 		for _, bf := range batchFermentables {
 			var ferm models.Fermentable
 			db.First(&ferm, "id = ?", bf.FermentableID)
-			fermentablesWithAmount = append(fermentablesWithAmount, FermentableWithAmount{
-				Fermentable: ferm,
-				Amount:      bf.Amount,
+			fermentablesWithAmount = append(fermentablesWithAmount, models.BatchFermentableWithMetadata{
+				BatchFermentableID: bf.BatchFermentableID,
+				Fermentable:        ferm,
+				Amount:             bf.Amount,
 			})
 		}
 
-		batchResponses = append(batchResponses, BatchResponse{
+		batchResponses = append(batchResponses, models.BatchWithMetaData{
 			Batch:        batch,
 			Hops:         hopsWithAmount,
 			Fermentables: fermentablesWithAmount,

@@ -6,7 +6,7 @@ class Batch {
     IBU: number = 0;
     Created: Date = new Date();
 
-    Fermantables: Fermentable[] = [];
+    Fermentables: Fermentable[] = [];
     Hops: Hop[] = [];
 
     static fromJSON(json: any): Batch {
@@ -17,7 +17,7 @@ class Batch {
             OG: json.OG,
             IBU: json.IBU,
             Created: json.Created,
-            Fermantables: Fermentable.fromJSONList(json.Fermantables || []),
+            Fermentables: Fermentable.fromJSONList(json.Fermentables || []),
             Hops: Hop.fromJSONList(json.Hops || [])
         };
         return recipe;
@@ -28,6 +28,7 @@ class Batch {
 }
 
 export class Fermentable {
+    BatchFermentableID: string = '';
     ID: string = '';
     BatchID: string = '';
     Name: string = '';
@@ -38,7 +39,8 @@ export class Fermentable {
     Amount: number = 0;
 
     static fromJSON(json: any): Fermentable {
-        const fermantable: Fermentable = {
+        const fermentable: Fermentable = {
+            BatchFermentableID: json.BatchFermentableID,
             ID: json.ID,
             BatchID: json.BatchID,
             Name: json.Name,
@@ -48,7 +50,7 @@ export class Fermentable {
             Notes: json.Notes,
             Amount: json.Amount
         };
-        return fermantable;
+        return fermentable;
     }
     static fromJSONList(jsonList: any[]): Fermentable[] {
         return jsonList.map((json) => Fermentable.fromJSON(json));
@@ -56,6 +58,7 @@ export class Fermentable {
 }
 
 export class Hop {
+    BatchHopID: string = '';
     ID: string = '';
     BatchID: string = '';
     Name: string = '';
@@ -67,6 +70,7 @@ export class Hop {
 
     static fromJSON(json: any): Hop {
         const hop: Hop = {
+            BatchHopID: json.BatchHopID,
             ID: json.ID,
             BatchID: json.BatchID,
             Name: json.Name,
