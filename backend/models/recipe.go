@@ -10,6 +10,7 @@ import (
 type Recipe struct {
 	ID      uuid.UUID `gorm:"type:uuid;primaryKey"`
 	Name    string
+	Notes   string
 	UserID  uuid.UUID
 	StyleID uuid.UUID
 	Created time.Time `gorm:"autoCreateTime"`

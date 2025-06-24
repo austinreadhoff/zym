@@ -4,6 +4,7 @@ class Batch {
     Number: Number = 0;
     OG: number = 0;
     IBU: number = 0;
+    Notes: string = '';
     Created: Date = new Date();
 
     Fermentables: Fermentable[] = [];
@@ -16,6 +17,7 @@ class Batch {
             Number: json.Number,
             OG: json.OG,
             IBU: json.IBU,
+            Notes: json.Notes,
             Created: json.Created,
             Fermentables: Fermentable.fromJSONList(json.Fermentables || []),
             Hops: Hop.fromJSONList(json.Hops || [])

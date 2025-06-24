@@ -204,6 +204,13 @@ function Batch({ batchIn, onBatchChange, onBatchDelete, disableDelete, hops, fer
         ))}
         <button type="button" onClick={handleAddHop} style={{ marginTop: 4 }}>Add Hop</button>
       </div>
+      <textarea
+        name="Notes"
+        value={batchIn.Notes}
+        onChange={handleBatchChange}
+        placeholder="Batch notes"
+        rows={4}
+      />
     </div>
   );
 }

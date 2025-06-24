@@ -13,6 +13,7 @@ type Batch struct {
 	Number   int
 	OG       float64
 	IBU      float64
+	Notes    string
 	Created  time.Time `gorm:"autoCreateTime"`
 
 	Fermentables []*Fermentable `gorm:"many2many:batch_fermentable;"`

@@ -154,6 +154,13 @@ function Recipe() {
             </option>
           ))}
         </select>
+        <textarea
+          name="Notes"
+          value={recipe.Notes}
+          onChange={handleRecipeChange}
+          placeholder="Recipe notes"
+          rows={4}
+        />
         <div style={{ display: 'flex', alignItems: 'center', margin: '16px 0' }}>
           <button
             type="button"

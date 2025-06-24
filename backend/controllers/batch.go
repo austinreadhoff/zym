@@ -43,9 +43,10 @@ func UpdateBatch(c *gin.Context, db *gorm.DB) {
 	}
 	input.ID = batchID
 
-	db.Model(&models.Batch{}).Where("id = ?", batchID).Select("og", "ibu").Updates(map[string]interface{}{
-		"og":  input.OG,
-		"ibu": input.IBU,
+	db.Model(&models.Batch{}).Where("id = ?", batchID).Select("og", "ibu", "notes").Updates(map[string]interface{}{
+		"og":    input.OG,
+		"ibu":   input.IBU,
+		"notes": input.Notes,
 	})
 
 	// Hops
