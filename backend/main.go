@@ -137,7 +137,7 @@ func seedFromStaticDB() {
 	db.Model(&models.Style{}).Count(&count)
 	if count == 0 {
 		var sourceStyles []models.SourceStyle
-		staticDB.Find(&sourceStyles)
+		staticDB.Distinct("name").Find(&sourceStyles)
 
 		var styles []models.Style
 		for _, sourceStyle := range sourceStyles {
@@ -153,7 +153,7 @@ func seedFromStaticDB() {
 	db.Model(&models.Fermentable{}).Count(&count)
 	if count == 0 {
 		var sourceFermentables []models.SourceFermentable
-		staticDB.Find(&sourceFermentables)
+		staticDB.Distinct("name").Find(&sourceFermentables)
 
 		var fermentables []models.Fermentable
 		for _, sourceFermentable := range sourceFermentables {
@@ -172,7 +172,7 @@ func seedFromStaticDB() {
 	db.Model(&models.Hop{}).Count(&count)
 	if count == 0 {
 		var sourceHops []models.SourceHop
-		staticDB.Find(&sourceHops)
+		staticDB.Distinct("name").Find(&sourceHops)
 
 		var hops []models.Hop
 		for _, sourceHop := range sourceHops {
