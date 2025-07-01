@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
-import '../App.css';
+import './Login.css';
+import logo from '../img/logo_lg.png';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../APIClient';
 
@@ -8,7 +9,6 @@ type LoginProps = {
 };
 
 function Login({ onLogin }: LoginProps) {
-  const apiUrl = process.env.REACT_APP_API_URL;
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState("");
@@ -33,12 +33,12 @@ function Login({ onLogin }: LoginProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Login</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <input value={username} onChange={e => setUsername(e.target.value)} placeholder="Username" />
+    <form id="login-form" onSubmit={handleSubmit}>
+      <img id="login-logo" src={logo} alt="Zym Logo" />
+      <input value={username} onChange={e => setUsername(e.target.value)} type="text" placeholder="Username" />
       <input value={password} onChange={e => setPassword(e.target.value)} type="password" placeholder="Password" />
-      <button type="submit">Login</button>
+      <button id="login-button" type="submit">Login</button>
+      {error && <span id="login-error">{error}</span>}
     </form>
   );
 }

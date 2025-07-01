@@ -1,7 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import _ from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import '../App.css';
 import { apiFetch } from '../APIClient';
 import mdlBatch, { Fermentable as FermentableModel, Hop as HopModel } from '../models/batch';
 
@@ -127,13 +126,13 @@ function Batch({ batchIn, onBatchChange, onBatchDelete, disableDelete, hops, fer
         Batch #{String(batchIn.Number)} (details go here)
       </div>
       <input 
-        type="string"
+        type="text"
         name="OG"
         value={batchIn.OG} 
         onChange={handleBatchChange}
       />
       <input 
-        type="string"
+        type="text"
         name="IBU"
         value={batchIn.IBU} 
         onChange={handleBatchChange}

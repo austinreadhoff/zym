@@ -13,9 +13,12 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
     });
 
     if (res.status === 401) {
+        if (window.location.pathname == "/login") {
+            return {response: res, data: {error: "Incorrect Username or Password"}};
+        }
+
         localStorage.removeItem('token');
         window.location.href = '/login';
-        throw new Error('Unauthorized');
     }
 
     var data = await res.json();

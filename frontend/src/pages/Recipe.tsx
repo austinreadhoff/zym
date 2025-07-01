@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import _ from 'lodash';
-import '../App.css';
 import { apiFetch } from '../APIClient';
 import Batch from '../components/Batch';
 import mdlRecipe from '../models/recipe';
