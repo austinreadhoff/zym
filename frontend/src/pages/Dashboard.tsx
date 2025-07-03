@@ -5,13 +5,7 @@ import Recipe from '../models/recipe';
 
 function Dashboard() {
   const [recipes, setRecipes] = React.useState<Recipe[]>([]);
-
-  //TODO: export logout button and function to a common location
   const navigate = useNavigate();
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
-  };
 
   useEffect(() => {
     apiFetch('/api/recipes')
@@ -35,7 +29,6 @@ function Dashboard() {
 
   return (
     <div>
-      <button onClick={handleLogout}>Logout</button>
       <button onClick={handleNew}>New</button>
       <h1>Recipes</h1>
       <ul>

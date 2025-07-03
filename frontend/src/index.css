@@ -9,6 +9,11 @@ body {
   background-color: var(--zym-green);
 }
 
+#app-container {
+  margin-left: calc(var(--sidebar-width) + var(--sidebar-margin));
+  margin-top: var(--header-height);
+}
+
 input[type='text'],
 input[type='number'],
 input[type='password'] {
@@ -34,4 +39,10 @@ button {
   margin: 5px;
   padding: 8px;
   width: fit-content;
+}
+
+@media (max-width: 768px) {
+  #app-container {
+    margin-left: var(--sidebar-margin)
+  }
 }

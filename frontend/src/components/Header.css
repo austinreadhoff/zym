@@ -1,0 +1,27 @@
+#header {
+  position: absolute;
+  left: var(--sidebar-width);
+  top: 0;
+  height: var(--header-height);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  z-index: 999;
+}
+
+#page-title {
+  margin-left: var(--sidebar-margin);
+}
+
+@media (max-width: 768px) {
+  #header {
+    position: fixed;
+    left: 0;
+    background: var(--zym-brown);
+    color: white;
+  }
+
+  #page-title {
+    margin-left: 50px;
+  }
+}

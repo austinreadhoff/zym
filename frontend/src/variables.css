@@ -1,6 +1,12 @@
 :root {
     --zym-orange: #FBA401;
     --zym-green: #EAF7CF;
+    --zym-brown: #31231E;
     --zym-blue: #485696;
     --zym-red: #CA2E55;
+
+    --header-height: 60px;
+
+    --sidebar-width: 175px;
+    --sidebar-margin: 20px;
 }
