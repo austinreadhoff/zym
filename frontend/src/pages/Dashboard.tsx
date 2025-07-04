@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { apiFetch } from '../APIClient';
 import Recipe from '../models/recipe';
+import './Dashboard.css';
 
 function Dashboard() {
   const [recipes, setRecipes] = React.useState<Recipe[]>([]);
@@ -29,14 +30,21 @@ function Dashboard() {
 
   return (
     <div>
-      <button onClick={handleNew}>New</button>
-      <h1>Recipes</h1>
-      <ul>
+      <i>states go here</i>
+      <hr></hr>
+      <div className="inline-container">
+        <h2>Recipes</h2>
+        <button onClick={handleNew}>+ Add</button>
+      </div>
+      <ul id="recipe-list">
         {recipes.length === 0 && <p>You haven't created any recipes</p>}
         {recipes.map(recipe => (
           <li key={recipe.ID}>
             <Link to={`/recipe/${recipe.ID}`}>
-              {recipe.Name}
+              <p>
+                <span className="recipe-name">{recipe.Name}</span> - <span className="recipe-style">{recipe.Style?.Name}</span>
+              </p>
+              <p className="recipe-sub">Last Brewed: --/--/----</p>
             </Link>
           </li>
         ))}

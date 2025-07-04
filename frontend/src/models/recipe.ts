@@ -7,13 +7,16 @@ class Recipe {
     StyleID: string = '';
     Created: Date = new Date();
 
+    Style: Style | null = null;
+
     static fromJSON(json: any): Recipe {
         const recipe: Recipe = {
             ID: json.ID,
             Name: json.Name,
             Notes: json.Notes,
             StyleID: json.StyleID,
-            Created: json.Created
+            Created: json.Created,
+            Style: json.Style ? Style.fromJSON(json.Style) : null,
         };
         return recipe;
     }

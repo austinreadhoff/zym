@@ -12,7 +12,7 @@ import (
 func GetRecipes(c *gin.Context, db *gorm.DB) {
 	userID := c.MustGet("userid").(string)
 	var recipes []models.Recipe
-	db.Where("user_id = ?", userID).Find(&recipes)
+	db.Joins("Style").Where("user_id = ?", userID).Find(&recipes)
 
 	c.JSON(http.StatusOK, gin.H{
 		"recipes": recipes,

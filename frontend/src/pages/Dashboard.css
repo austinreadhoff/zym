@@ -1,0 +1,30 @@
+#recipe-list {
+    list-style-type: none;
+    padding: 0;
+    width: fit-content;
+}
+
+#recipe-list a {
+    text-decoration: none;
+    color: var(--texßt-color-dark);
+    display: block;
+    padding: 5px 10px;
+    border-bottom: 1px solid var(--hightlight-color);
+}
+#recipe-list a:hover,
+#recipe-list a:active {
+    background-color: var(--zym-green);
+    border-color: transparent;
+    box-shadow: var(--hightlight-color) 0 0 5px;
+}
+
+.recipe-name {
+    font-weight: bold;
+}
+.recipe-style {
+    font-size: .8em;
+}
+.recipe-sub {
+    font-style: italic;
+    font-size: .8em;
+}

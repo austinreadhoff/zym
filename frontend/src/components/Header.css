@@ -18,7 +18,7 @@
     position: fixed;
     left: 0;
     background: var(--zym-brown);
-    color: white;
+    color: var(--text-color-light);
   }
 
   #page-title {
