@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { apiFetch } from '../APIClient';
 import mdlBatch, { Fermentable as FermentableModel, Hop as HopModel } from '../models/batch';
+import './Batch.css';
 
 type BatchProps = {
   batchIn: mdlBatch;
@@ -121,28 +122,36 @@ function Batch({ batchIn, onBatchChange, onBatchDelete, disableDelete, hops, fer
 
   return (
     <div>
-      <button onClick={onBatchDelete} disabled={disableDelete}>Delete</button>
-      <div style={{ border: '1px solid #ccc', padding: 12, marginBottom: 8 }}>
-        Batch #{String(batchIn.Number)} (details go here)
+      <div className="form-group">
+        <label htmlFor="OG">OG:</label>
+        <input 
+          className="input-sm"
+          type="text"
+          name="OG"
+          value={batchIn.OG} 
+          onChange={handleBatchChange}
+        />
       </div>
-      <input 
-        type="text"
-        name="OG"
-        value={batchIn.OG} 
-        onChange={handleBatchChange}
-      />
-      <input 
-        type="text"
-        name="IBU"
-        value={batchIn.IBU} 
-        onChange={handleBatchChange}
-      />
+      <div className="form-group">
+        <label htmlFor="IBU">IBU:</label>
+        <input 
+          className="input-sm"
+          type="text"
+          name="IBU"
+          value={batchIn.IBU} 
+          onChange={handleBatchChange}
+        />
+      </div>
 
       {/* Fermentables Section */}
       <div style={{ marginTop: 16 }}>
-        <h4>Fermentables</h4>
+        <div className="inline-container">
+          <h4>Fermentables</h4>
+          <button type="button" onClick={handleAddFermentable} style={{ marginTop: 4 }}>+ Add</button>
+        </div>
         {(batchIn.Fermentables || []).map((f: FermentableModel, idx: number) => (
-          <div key={idx} style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
+          <div key={idx} className="fermentable-container">
+            <button type="button"  className="danger" onClick={() => handleRemoveFermentable(idx)}>-</button>
             <select
               value={f.ID}
               onChange={e => handleFermentableChange(idx, 'ID', String(e.target.value))}
@@ -151,24 +160,29 @@ function Batch({ batchIn, onBatchChange, onBatchDelete, disableDelete, hops, fer
                 <option key={opt.ID} value={String(opt.ID)}>{opt.Name}</option>
               ))}
             </select>
-            <input
-              type="number"
-              placeholder="Amount"
-              value={f.Amount}
-              onChange={e => handleFermentableChange(idx, 'Amount', Number(e.target.value))}
-              style={{ marginLeft: 8, width: 80 }}
-            />
-            <button type="button" onClick={() => handleRemoveFermentable(idx)} style={{ marginLeft: 8 }}>Remove</button>
+            <div className="form-group">
+              <label>Oz:</label>
+              <input
+                className="input-sm"
+                type="number"
+                placeholder="Amount"
+                value={f.Amount}
+                onChange={e => handleFermentableChange(idx, 'Amount', Number(e.target.value))}
+              />
+            </div>
           </div>
         ))}
-        <button type="button" onClick={handleAddFermentable} style={{ marginTop: 4 }}>Add Fermentable</button>
       </div>
 
       {/* Hops Section */}
       <div style={{ marginTop: 16 }}>
-        <h4>Hops</h4>
+        <div className="inline-container">
+          <h4>Hops</h4>
+          <button type="button" onClick={handleAddHop} style={{ marginTop: 4 }}>+ Add</button>
+        </div>
         {(batchIn.Hops || []).map((h: HopModel, idx: number) => (
-          <div key={idx} style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
+          <div key={idx} className="hop-container">
+            <button type="button" className="danger" onClick={() => handleRemoveHop(idx)}>-</button>
             <select
               value={h.ID}
               onChange={e => handleHopChange(idx, 'ID', String(e.target.value))}
@@ -177,20 +191,26 @@ function Batch({ batchIn, onBatchChange, onBatchDelete, disableDelete, hops, fer
                 <option key={opt.ID} value={String(opt.ID)}>{opt.Name}</option>
               ))}
             </select>
-            <input
-              type="number"
-              placeholder="Amount"
-              value={h.Amount}
-              onChange={e => handleHopChange(idx, 'Amount', Number(e.target.value))}
-              style={{ marginLeft: 8, width: 80 }}
-            />
-            <input
-              type="number"
-              placeholder="Boil Minutes"
-              value={h.BoilMinutes}
-              onChange={e => handleHopChange(idx, 'BoilMinutes', Number(e.target.value))}
-              style={{ marginLeft: 8, width: 100 }}
-            />
+            <div className="form-group">
+              <label>Oz:</label>
+              <input
+                className="input-sm"
+                type="number"
+                placeholder="Amount"
+                value={h.Amount}
+                onChange={e => handleHopChange(idx, 'Amount', Number(e.target.value))}
+              />
+            </div>
+            <div className="form-group">
+              <label>Min:</label>
+              <input
+                className="input-sm"
+                type="number"
+                placeholder="Boil Minutes"
+                value={h.BoilMinutes}
+                onChange={e => handleHopChange(idx, 'BoilMinutes', Number(e.target.value))}
+              />
+            </div>
             <label style={{ marginLeft: 8 }}>
               <input
                 type="checkbox"
@@ -198,10 +218,8 @@ function Batch({ batchIn, onBatchChange, onBatchDelete, disableDelete, hops, fer
                 onChange={e => handleHopChange(idx, 'DryHop', e.target.checked)}
               /> Dry Hop
             </label>
-            <button type="button" onClick={() => handleRemoveHop(idx)} style={{ marginLeft: 8 }}>Remove</button>
           </div>
         ))}
-        <button type="button" onClick={handleAddHop} style={{ marginTop: 4 }}>Add Hop</button>
       </div>
       <textarea
         name="Notes"
@@ -210,6 +228,7 @@ function Batch({ batchIn, onBatchChange, onBatchDelete, disableDelete, hops, fer
         placeholder="Batch notes"
         rows={4}
       />
+      <br/><button className="danger" onClick={onBatchDelete} disabled={disableDelete}>Delete Batch</button>
     </div>
   );
 }

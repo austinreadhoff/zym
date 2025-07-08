@@ -7,6 +7,7 @@ import mdlRecipe from '../models/recipe';
 import Style from '../models/style';
 import mdlBatch from '../models/batch';
 import { Fermentable, Hop } from '../models/batch';
+import './Recipe.css';
 
 function Recipe() {
   const id = useParams().id;
@@ -131,46 +132,46 @@ function Recipe() {
 
   return (
     <div>
-      <button onClick={handleDelete}>Delete</button>
       <form>
-        <input 
-          type="text"
-          name="Name"
-          value={recipe.Name} 
-          onChange={handleRecipeChange}
-        />
-        <select
-          value={recipe.StyleID || ''}
-          onChange={(e: any) => {
-            recipe.StyleID = e.target.value;
-            handleRecipeChange(e);
-          }}
-        >
-          <option value="">Select a style</option>
-          {styles.map(style => (
-            <option key={style.ID} value={style.ID}>
-              {style.Name}
-            </option>
-          ))}
-        </select>
-        <textarea
-          name="Notes"
-          value={recipe.Notes}
-          onChange={handleRecipeChange}
-          placeholder="Recipe notes"
-          rows={4}
-        />
+        <div className="form-group">
+          <label htmlFor="Name">Recipe Name:</label>
+          <input 
+            type="text"
+            name="Name"
+            placeholder="Recipe Name"
+            value={recipe.Name} 
+            onChange={handleRecipeChange}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="StyleID">Style:</label>
+          <select
+          name="StyleID"
+            value={recipe.StyleID || ''}
+            onChange={(e: any) => {
+              recipe.StyleID = e.target.value;
+              handleRecipeChange(e);
+            }}
+          >
+            <option value="">Select a style</option>
+            {styles.map(style => (
+              <option key={style.ID} value={style.ID}>
+                {style.Name}
+              </option>
+            ))}
+          </select>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', margin: '16px 0' }}>
           <button
             type="button"
             disabled={batches.length === 0 || selectedBatchIndex === 0}
             onClick={() => setSelectedBatchIndex(i => i - 1)}
           >
-            &#8592; Back
+            &#8592; Prev
           </button>
           <span style={{ margin: '0 12px' }}>
             {batches.length > 0
-              ? `Batch ${batches[selectedBatchIndex]?.Number ?? ''}`
+              ? `Batch #${batches[selectedBatchIndex]?.Number ?? ''}`
               : 'No Batches'}
           </span>
           {selectedBatchIndex === batches.length - 1 ? (
@@ -191,6 +192,7 @@ function Recipe() {
             </button>
           )}
         </div>
+        <hr/>
         <div>
           {batches.map((batch, idx) =>
             idx === selectedBatchIndex ? (
@@ -206,6 +208,15 @@ function Recipe() {
             ) : null
           )}
         </div>
+        <hr/>
+        <textarea
+          name="Notes"
+          value={recipe.Notes}
+          onChange={handleRecipeChange}
+          placeholder="Recipe notes"
+          rows={4}
+        />
+        <br/><button className="danger" onClick={handleDelete}>Delete Recipe</button>
       </form>
     </div>
   );

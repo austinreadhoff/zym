@@ -1,6 +1,10 @@
 # TODOs
 - [X] Fun with styling/layout
 - [ ] Recipe Calc
+- [ ] Hop Change AA
+- [ ] OG formatting
+- [ ] Look into UI icons
+- [ ] Save Indicators
 - [ ] Compare Batch numbers to Style numbers
 - [ ] Beyond planning...
 - [ ] State tracking

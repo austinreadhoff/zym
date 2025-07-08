@@ -3,7 +3,7 @@
   left: var(--sidebar-width);
   top: 0;
   height: var(--header-height);
-  width: 100%;
+  width: calc(100% - var(--sidebar-width) - var(--sidebar-margin));
   display: flex;
   align-items: center;
   z-index: 999;
@@ -17,6 +17,7 @@
   #header {
     position: fixed;
     left: 0;
+    width: 100%;
     background: var(--zym-brown);
     color: var(--text-color-light);
   }

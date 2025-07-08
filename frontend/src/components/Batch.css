@@ -1,0 +1,7 @@
+.fermentable-container,
+.hop-container {
+    display: "flex";
+    align-items: "center";
+    margin-bottom: 5px;
+    border-bottom: 1px solid var(--hightlight-color);
+}
