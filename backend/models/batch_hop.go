@@ -11,6 +11,7 @@ type BatchHop struct {
 	BatchHopID  uuid.UUID `gorm:"primaryKey"`
 	BatchID     uuid.UUID
 	HopID       uuid.UUID
+	AlphaAcid   float64
 	Amount      float64 // assume oz for now, maybe add other units later
 	BoilMinutes int64
 	DryHop      bool      // Maybe expand for other uses later

@@ -41,6 +41,7 @@ func GetRecipe(c *gin.Context, db *gorm.DB) {
 			hopsWithAmount = append(hopsWithAmount, models.BatchHopWithMetadata{
 				BatchHopID:  bh.BatchHopID,
 				Hop:         hop,
+				AlphaAcid:   bh.AlphaAcid,
 				Amount:      bh.Amount,
 				BoilMinutes: bh.BoilMinutes,
 				DryHop:      bh.DryHop,
@@ -57,7 +58,8 @@ func GetRecipe(c *gin.Context, db *gorm.DB) {
 			fermentablesWithAmount = append(fermentablesWithAmount, models.BatchFermentableWithMetadata{
 				BatchFermentableID: bf.BatchFermentableID,
 				Fermentable:        ferm,
-				Amount:             bf.Amount,
+				Percent:            bf.Percent,
+				Mash:               bf.Mash,
 			})
 		}
 

@@ -1,12 +1,11 @@
 # TODOs
 - [X] Fun with styling/layout
 - [ ] Recipe Calc
-- [ ] Hop Change AA
-- [ ] OG formatting
-- [ ] Look into UI icons
+- [ ] Configurable equipment setup (must retain for batch history)
+- [ ] number fields formatting
 - [ ] Save Indicators
 - [ ] Compare Batch numbers to Style numbers
-- [ ] Beyond planning...
+- [ ] metrics beyond tracking: og(s), fg, refractometer, etc.
 - [ ] State tracking
 - [ ] different amount measurements
 - [ ] Typeaheads

@@ -57,6 +57,7 @@ func UpdateBatch(c *gin.Context, db *gorm.DB) {
 		inputHopIDs[h.ID] = models.BatchHop{
 			BatchID:     batchID,
 			HopID:       h.ID,
+			AlphaAcid:   h.AlphaAcid,
 			Amount:      h.Amount,
 			BoilMinutes: h.BoilMinutes,
 			DryHop:      h.DryHop,
@@ -89,7 +90,8 @@ func UpdateBatch(c *gin.Context, db *gorm.DB) {
 		inputFermIDs[f.ID] = models.BatchFermentable{
 			BatchID:       batchID,
 			FermentableID: f.ID,
-			Amount:        f.Amount,
+			Percent:       f.Percent,
+			Mash:          f.Mash,
 		}
 	}
 	dbFermIDs := make(map[uuid.UUID]models.BatchFermentable)

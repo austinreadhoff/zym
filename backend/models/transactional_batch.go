@@ -9,6 +9,7 @@ import (
 type BatchHopWithMetadata struct {
 	Hop
 	BatchHopID  uuid.UUID
+	AlphaAcid   float64
 	Amount      float64
 	BoilMinutes int64
 	DryHop      bool
@@ -16,7 +17,8 @@ type BatchHopWithMetadata struct {
 type BatchFermentableWithMetadata struct {
 	Fermentable
 	BatchFermentableID uuid.UUID
-	Amount             float64
+	Percent            float64
+	Mash               bool
 }
 type BatchWithMetaData struct {
 	Batch

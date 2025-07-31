@@ -11,7 +11,8 @@ type BatchFermentable struct {
 	BatchFermentableID uuid.UUID `gorm:"primaryKey"`
 	BatchID            uuid.UUID
 	FermentableID      uuid.UUID
-	Amount             float64   // assume oz for now, maybe add other units later
+	Percent            float64 // assume oz for now, maybe add other units later
+	Mash               bool
 	Created            time.Time `gorm:"autoCreateTime"`
 
 	Batch       Batch       `gorm:"foreignKey:BatchID"`

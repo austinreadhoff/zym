@@ -60,6 +60,14 @@ function Batch({ batchIn, onBatchChange, onBatchDelete, disableDelete, hops, fer
     const updated = batchIn.Fermentables.map((f: FermentableModel, i: number) =>
       i === idx ? { ...f, [field]: value } : f
     );
+
+    if (field === 'ID') {
+      const selected = fermentables.find(f => String(f.ID) === String(value));
+      if (selected) {
+        updated[idx] = { ...updated[idx], Mash: selected.Mash };
+      }
+    }
+
     if (JSON.stringify(batchIn.Fermentables) !== JSON.stringify(updated)) {
       onBatchChange({ ...batchIn, Fermentables: updated });
     }
@@ -75,9 +83,9 @@ function Batch({ batchIn, onBatchChange, onBatchDelete, disableDelete, hops, fer
       Name: first.Name,
       Yield: 0,
       Color: 0,
-      Mash: false,
+      Mash: first.Mash,
       Notes: '',
-      Amount: 0
+      Percent: 0
     };
     const updated = [...(batchIn.Fermentables || []), newFerm];
     onBatchChange({ ...batchIn, Fermentables: updated });
@@ -92,6 +100,14 @@ function Batch({ batchIn, onBatchChange, onBatchDelete, disableDelete, hops, fer
     const updated = batchIn.Hops.map((h: HopModel, i: number) =>
       i === idx ? { ...h, [field]: value } : h
     );
+
+    if (field === 'ID') {
+      const selected = hops.find(h => String(h.ID) === String(value));
+      if (selected) {
+        updated[idx] = { ...updated[idx], AlphaAcid: selected.AlphaAcid };
+      }
+    }
+
     if (JSON.stringify(batchIn.Hops) !== JSON.stringify(updated)) {
       onBatchChange({ ...batchIn, Hops: updated });
     }
@@ -105,7 +121,7 @@ function Batch({ batchIn, onBatchChange, onBatchDelete, disableDelete, hops, fer
       ID: String(first.ID),
       BatchID: batchIn.ID,
       Name: first.Name,
-      AlphaAcid: 0,
+      AlphaAcid: first.AlphaAcid,
       Notes: '',
       Amount: 0,
       BoilMinutes: 0,
@@ -161,15 +177,21 @@ function Batch({ batchIn, onBatchChange, onBatchDelete, disableDelete, hops, fer
               ))}
             </select>
             <div className="form-group">
-              <label>Oz:</label>
+              <label>%:</label>
               <input
                 className="input-sm"
                 type="number"
-                placeholder="Amount"
-                value={f.Amount}
-                onChange={e => handleFermentableChange(idx, 'Amount', Number(e.target.value))}
+                value={f.Percent}
+                onChange={e => handleFermentableChange(idx, 'Percent', Number(e.target.value))}
               />
             </div>
+            <label style={{ marginLeft: 8 }}>
+              <input
+                type="checkbox"
+                checked={!!f.Mash}
+                onChange={e => handleFermentableChange(idx, 'Mash', e.target.checked)}
+              /> Mash
+            </label>
           </div>
         ))}
       </div>
@@ -192,11 +214,19 @@ function Batch({ batchIn, onBatchChange, onBatchDelete, disableDelete, hops, fer
               ))}
             </select>
             <div className="form-group">
+              <label>Alpha %:</label>
+              <input
+                className="input-sm"
+                type="number"
+                value={h.AlphaAcid}
+                onChange={e => handleHopChange(idx, 'AlphaAcid', Number(e.target.value))}
+              />
+            </div>
+            <div className="form-group">
               <label>Oz:</label>
               <input
                 className="input-sm"
                 type="number"
-                placeholder="Amount"
                 value={h.Amount}
                 onChange={e => handleHopChange(idx, 'Amount', Number(e.target.value))}
               />
@@ -206,7 +236,6 @@ function Batch({ batchIn, onBatchChange, onBatchDelete, disableDelete, hops, fer
               <input
                 className="input-sm"
                 type="number"
-                placeholder="Boil Minutes"
                 value={h.BoilMinutes}
                 onChange={e => handleHopChange(idx, 'BoilMinutes', Number(e.target.value))}
               />

@@ -38,7 +38,7 @@ export class Fermentable {
     Color: number = 0;
     Mash: boolean = false;
     Notes: string = '';
-    Amount: number = 0;
+    Percent: number = 0;
 
     static fromJSON(json: any): Fermentable {
         const fermentable: Fermentable = {
@@ -50,7 +50,7 @@ export class Fermentable {
             Color: json.Color,
             Mash: json.Mash,
             Notes: json.Notes,
-            Amount: json.Amount
+            Percent: json.Percent
         };
         return fermentable;
     }
