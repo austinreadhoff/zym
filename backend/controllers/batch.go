@@ -43,6 +43,7 @@ func UpdateBatch(c *gin.Context, db *gorm.DB) {
 	}
 	input.ID = batchID
 
+	// Update batch fields
 	db.Model(&models.Batch{}).Where("id = ?", batchID).Select("og", "ibu", "notes").Updates(map[string]interface{}{
 		"og":    input.OG,
 		"ibu":   input.IBU,
@@ -52,66 +53,78 @@ func UpdateBatch(c *gin.Context, db *gorm.DB) {
 	// Hops
 	var dbHops []models.BatchHop
 	db.Where("batch_id = ?", batchID).Find(&dbHops)
-	inputHopIDs := make(map[uuid.UUID]models.BatchHop)
-	for _, h := range input.Hops {
-		inputHopIDs[h.ID] = models.BatchHop{
-			BatchID:     batchID,
-			HopID:       h.ID,
-			AlphaAcid:   h.AlphaAcid,
-			Amount:      h.Amount,
-			BoilMinutes: h.BoilMinutes,
-			DryHop:      h.DryHop,
-		}
-	}
-	dbHopIDs := make(map[uuid.UUID]models.BatchHop)
+	dbHopMap := make(map[uuid.UUID]models.BatchHop)
 	for _, h := range dbHops {
-		dbHopIDs[h.HopID] = h
+		dbHopMap[h.BatchHopID] = h
 	}
-	// Delete
-	for id := range dbHopIDs {
-		if _, exists := inputHopIDs[id]; !exists {
-			db.Where("batch_id = ? AND hop_id = ?", batchID, id).Delete(&models.BatchHop{})
+	inputHopMap := make(map[uuid.UUID]models.BatchHopWithMetadata)
+	for _, h := range input.Hops {
+		inputHopMap[h.BatchHopID] = h
+	}
+	// Delete hops not present in input
+	for id := range dbHopMap {
+		if _, exists := inputHopMap[id]; !exists {
+			db.Delete(&models.BatchHop{}, "batch_hop_id = ?", id)
 		}
 	}
-	// Add/Update
-	for id, h := range inputHopIDs {
-		if _, exists := dbHopIDs[id]; !exists {
-			db.Create(&h)
+	// Add or update hops
+	for _, h := range input.Hops {
+		if h.BatchHopID == uuid.Nil {
+			// New hop addition
+			newHop := models.BatchHop{
+				BatchID:     batchID,
+				HopID:       h.Hop.ID,
+				AlphaAcid:   h.AlphaAcid,
+				Amount:      h.Amount,
+				BoilMinutes: h.BoilMinutes,
+				DryHop:      h.DryHop,
+			}
+			db.Create(&newHop)
 		} else {
-			db.Model(&models.BatchHop{}).Where("batch_id = ? AND hop_id = ?", batchID, id).Updates(h)
+			// Update existing
+			db.Model(&models.BatchHop{}).Where("batch_hop_id = ?", h.BatchHopID).Updates(models.BatchHop{
+				AlphaAcid:   h.AlphaAcid,
+				Amount:      h.Amount,
+				BoilMinutes: h.BoilMinutes,
+				DryHop:      h.DryHop,
+			})
 		}
 	}
 
 	// Fermentables
 	var dbFermentables []models.BatchFermentable
 	db.Where("batch_id = ?", batchID).Find(&dbFermentables)
-	inputFermIDs := make(map[uuid.UUID]models.BatchFermentable)
-	for _, f := range input.Fermentables {
-		inputFermIDs[f.ID] = models.BatchFermentable{
-			BatchID:       batchID,
-			FermentableID: f.ID,
-			Percent:       f.Percent,
-			Mash:          f.Mash,
-		}
-	}
-	dbFermIDs := make(map[uuid.UUID]models.BatchFermentable)
+	dbFermMap := make(map[uuid.UUID]models.BatchFermentable)
 	for _, f := range dbFermentables {
-		dbFermIDs[f.FermentableID] = f
+		dbFermMap[f.BatchFermentableID] = f
 	}
-	// Delete
-	for id := range dbFermIDs {
-		if _, exists := inputFermIDs[id]; !exists {
-			db.Where("batch_id = ? AND fermentable_id = ?", batchID, id).Delete(&models.BatchFermentable{})
+	inputFermMap := make(map[uuid.UUID]models.BatchFermentableWithMetadata)
+	for _, f := range input.Fermentables {
+		inputFermMap[f.BatchFermentableID] = f
+	}
+	// Delete fermentables not present in input
+	for id := range dbFermMap {
+		if _, exists := inputFermMap[id]; !exists {
+			db.Delete(&models.BatchFermentable{}, "batch_fermentable_id = ?", id)
 		}
 	}
-	// Add/Update
-	for id, f := range inputFermIDs {
-		if _, exists := dbFermIDs[id]; !exists {
-			// Add new
-			db.Create(&f)
+	// Add or update fermentables
+	for _, f := range input.Fermentables {
+		if f.BatchFermentableID == uuid.Nil {
+			// New fermentable addition
+			newFerm := models.BatchFermentable{
+				BatchID:       batchID,
+				FermentableID: f.Fermentable.ID,
+				Percent:       f.Percent,
+				Mash:          f.Mash,
+			}
+			db.Create(&newFerm)
 		} else {
 			// Update existing
-			db.Model(&models.BatchFermentable{}).Where("batch_id = ? AND fermentable_id = ?", batchID, id).Updates(f)
+			db.Model(&models.BatchFermentable{}).Where("batch_fermentable_id = ?", f.BatchFermentableID).Updates(models.BatchFermentable{
+				Percent: f.Percent,
+				Mash:    f.Mash,
+			})
 		}
 	}
 

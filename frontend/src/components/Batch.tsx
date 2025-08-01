@@ -1,6 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
 import _ from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
 import { apiFetch } from '../APIClient';
 import mdlBatch, { Fermentable as FermentableModel, Hop as HopModel } from '../models/batch';
 import './Batch.css';
@@ -64,7 +63,14 @@ function Batch({ batchIn, onBatchChange, onBatchDelete, disableDelete, hops, fer
     if (field === 'ID') {
       const selected = fermentables.find(f => String(f.ID) === String(value));
       if (selected) {
-        updated[idx] = { ...updated[idx], Mash: selected.Mash };
+        updated[idx] = { 
+          ...updated[idx],
+          Name: selected.Name,
+          Yield: selected.Yield,
+          Color: selected.Color,
+          Notes: selected.Notes,
+          Mash: selected.Mash 
+        };
       }
     }
 
@@ -76,18 +82,14 @@ function Batch({ batchIn, onBatchChange, onBatchDelete, disableDelete, hops, fer
   const handleAddFermentable = () => {
     if (fermentables.length === 0) return;
     const first = fermentables[0];
-    const newFerm: FermentableModel = {
-      BatchFermentableID: uuidv4(),
-      ID: String(first.ID),
-      BatchID: batchIn.ID,
-      Name: first.Name,
-      Yield: 0,
-      Color: 0,
-      Mash: first.Mash,
-      Notes: '',
-      Percent: 0
-    };
-    const updated = [...(batchIn.Fermentables || []), newFerm];
+    const newFermentable: FermentableModel = new FermentableModel();
+    newFermentable.BatchFermentableID = null;
+    newFermentable.ID = String(first.ID);
+    newFermentable.BatchID = batchIn.ID;
+    newFermentable.Name = first.Name;
+    newFermentable.Mash = first.Mash;
+
+    const updated = [...(batchIn.Fermentables || []), newFermentable];
     onBatchChange({ ...batchIn, Fermentables: updated });
   };
 
@@ -104,7 +106,12 @@ function Batch({ batchIn, onBatchChange, onBatchDelete, disableDelete, hops, fer
     if (field === 'ID') {
       const selected = hops.find(h => String(h.ID) === String(value));
       if (selected) {
-        updated[idx] = { ...updated[idx], AlphaAcid: selected.AlphaAcid };
+        updated[idx] = { 
+          ...updated[idx], 
+          Name: selected.Name,
+          Notes: selected.Notes,
+          AlphaAcid: selected.AlphaAcid 
+        };
       }
     }
 
@@ -116,17 +123,13 @@ function Batch({ batchIn, onBatchChange, onBatchDelete, disableDelete, hops, fer
   const handleAddHop = () => {
     if (hops.length === 0) return;
     const first = hops[0];
-    const newHop: HopModel = {
-      BatchHopID: uuidv4(),
-      ID: String(first.ID),
-      BatchID: batchIn.ID,
-      Name: first.Name,
-      AlphaAcid: first.AlphaAcid,
-      Notes: '',
-      Amount: 0,
-      BoilMinutes: 0,
-      DryHop: false
-    };
+    const newHop: HopModel = new HopModel();
+    newHop.BatchHopID = null;
+    newHop.ID = String(first.ID);
+    newHop.BatchID = batchIn.ID;
+    newHop.Name = first.Name;
+    newHop.AlphaAcid = first.AlphaAcid;
+
     const updated = [...(batchIn.Hops || []), newHop];
     onBatchChange({ ...batchIn, Hops: updated });
   };
