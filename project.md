@@ -1,11 +1,14 @@
 # TODOs
 - [X] Fun with styling/layout
-- [ ] Recipe Calc
+- [X] Recipe Calc
 - [ ] Configurable equipment setup (must retain for batch history)
 - [ ] number fields formatting
 - [ ] Save Indicators
+- [ ] Dry Hop days
 - [ ] Compare Batch numbers to Style numbers
 - [ ] metrics beyond tracking: og(s), fg, refractometer, etc.
 - [ ] State tracking
 - [ ] different amount measurements
+- [ ] User mgmt
+- [ ] Dockerize
 - [ ] Typeaheads

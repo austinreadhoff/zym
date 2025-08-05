@@ -130,9 +130,48 @@ function Recipe() {
     debouncedSave(JSON.stringify(recipe));
   }, [recipe]);
 
+  const calculateReceipe = () => {
+    // Formulas adapted from Designing Great Beers by Ray Daniels
+
+    //TODO: Store Equipment Profile
+    var targetBatchGallons = 2.5;
+    var preFermentationGallons = 3.0;
+    var brewhouseEfficiency = 0.741;
+    
+    let batch = batches[selectedBatchIndex];
+
+    let gravityUnits = (batch.OG - 1) * 1000 * targetBatchGallons;
+    let srm = 0.0;
+
+    //TODO: If Yeild is 0, allow the user to input amount instead of percent, and report it directly
+    batch.Fermentables.forEach((f: Fermentable, i: number, fermantables: Fermentable[]) => {
+      let fermentableUnits = f.Percent / 100 * gravityUnits;
+      let efficiency = f.Mash ? brewhouseEfficiency : 1.0;
+      
+      let ppg = 46 /*sucrose constant*/ * f.Yield / 100;
+      
+      let oz = (fermentableUnits / ppg / efficiency) * 16;
+      fermantables[i].Oz = oz;
+
+      let mcu = (oz / 16) * targetBatchGallons;
+      srm += 1.4922 * (Math.pow(mcu, 0.6859))
+    });
+
+    let gravityCorrectionFactor = (batch.OG > 1.050) ? (1 + ((batch.OG - 1.050) / 0.2)) : 1.0;
+    //TODO: Get rid of batch IBU column
+    let ibu = 0.0;
+    batch.Hops.forEach((h: Hop) => {
+      ibu += (h.Amount * Hop.Utilization(h) * h.AlphaAcid / 100 * 7489) / (preFermentationGallons * gravityCorrectionFactor);
+    });
+
+    return `FERMENTABLES: ${batch.Fermentables.map(f => `${f.Name} (${f.Oz.toFixed(2)} oz)`).join(', ')}
+    HOPS: IBU ${ibu.toFixed()}, ${batch.Hops.map(h => `${h.Name} (${h.Amount.toFixed(2)} oz for ${h.BoilMinutes} minutes)`).join(', ')}
+    COLOR: ${srm.toFixed(1)} SRM`
+  }
+
   return (
     <div>
-      <form>
+      <form className="recipe-section">
         <div className="form-group">
           <label htmlFor="Name">Recipe Name:</label>
           <input 
@@ -218,6 +257,7 @@ function Recipe() {
         />
         <br/><button className="danger" onClick={handleDelete}>Delete Recipe</button>
       </form>
+      <div className="recipe-section">{calculateReceipe()}</div>
     </div>
   );
 }
